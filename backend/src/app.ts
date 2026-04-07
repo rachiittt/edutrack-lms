@@ -15,7 +15,7 @@ const logger = Logger.createLogger('App');
 // CORS
 app.use(
   cors({
-    origin: config.frontendUrl,
+    origin: [config.frontendUrl, 'http://localhost:5174'],
     credentials: true,
   })
 );

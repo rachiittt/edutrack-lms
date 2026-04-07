@@ -4,7 +4,7 @@ import { Course, PaginationInfo } from '../types';
 import { useAuth } from '../context/AuthContext';
 import CourseCard from '../components/CourseCard';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Filter, ChevronLeft, ChevronRight, Compass } from 'lucide-react';
 
 const CourseList: React.FC = () => {
   const { enrollments } = useAuth();
@@ -61,121 +61,123 @@ const CourseList: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-8 animate-fade-in pb-12">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-surface-900 dark:text-white mb-2">
-          Explore Courses
+      <div className="flex items-center gap-3 mb-2">
+        <Compass className="w-8 h-8 text-blue-500" />
+        <h1 className="text-4xl font-extrabold text-white tracking-tight">
+          Explore Projects
         </h1>
-        <p className="text-surface-500 dark:text-surface-400">
-          Discover courses from expert instructors
-        </p>
       </div>
+      <p className="text-primary-400 text-lg mb-8 max-w-2xl">
+        Discover highly curated learning paths and projects prepared by top experts in their respective fields.
+      </p>
 
-      {/* Search & Filter Bar */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <form onSubmit={handleSearch} className="flex-1 relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400" />
+      {/* Search & Filter Command Bar */}
+      <div className="bg-[#111111] border border-[#27272a] p-2 rounded-xl flex flex-col md:flex-row gap-2 shadow-widget w-full md:w-3/4 lg:w-2/3">
+        <form onSubmit={handleSearch} className="flex-1 relative flex items-center">
+          <Search className="absolute left-4 w-5 h-5 text-primary-500" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search courses..."
-            className="input-field pl-12 pr-24"
+            placeholder="Search catalog..."
+            className="w-full bg-transparent border-none text-white pl-12 pr-4 py-3 placeholder:text-primary-600 focus:outline-none focus:ring-0 font-medium"
           />
-          <button
-            type="submit"
-            className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors"
-          >
-            Search
-          </button>
         </form>
+        
+        <div className="w-px bg-[#27272a] mx-2 hidden md:block" />
 
-        <div className="relative">
-          <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400" />
+        <div className="relative flex items-center">
+          <Filter className="absolute left-4 w-4 h-4 text-primary-500" />
           <select
             value={category}
             onChange={(e) => {
               setCategory(e.target.value);
               setPage(1);
             }}
-            className="input-field pl-12 pr-8 appearance-none min-w-[200px]"
+            className="w-full md:w-48 bg-transparent border-none text-primary-300 pl-10 pr-8 py-3 appearance-none focus:outline-none focus:ring-0 text-sm font-medium"
           >
-            <option value="">All Categories</option>
+            <option value="" className="bg-[#111111]">All Disciplines</option>
             {categories.map((cat) => (
-              <option key={cat} value={cat}>
+              <option key={cat} value={cat} className="bg-[#111111]">
                 {cat}
               </option>
             ))}
           </select>
         </div>
+
+        <button
+          onClick={handleSearch}
+          className="bg-white text-black px-6 py-2 rounded-lg font-bold hover:bg-primary-200 transition-colors shrink-0"
+        >
+          Search
+        </button>
       </div>
 
-      {/* Results Info */}
-      {pagination && (
-        <p className="text-sm text-surface-500 dark:text-surface-400">
-          Showing {courses.length} of {pagination.total} courses
-        </p>
-      )}
-
-      {/* Course Grid */}
       {loading ? (
-        <div className="flex items-center justify-center h-64">
+        <div className="flex items-center justify-center h-[40vh]">
           <LoadingSpinner size="lg" />
         </div>
       ) : courses.length === 0 ? (
-        <div className="card p-12 text-center">
-          <Search className="w-12 h-12 text-surface-300 dark:text-surface-600 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-surface-700 dark:text-surface-300 mb-2">
-            No courses found
-          </h3>
-          <p className="text-surface-500 dark:text-surface-400">
-            Try adjusting your search or filter criteria
+        <div className="widget-panel p-16 text-center max-w-2xl mx-auto flex flex-col items-center">
+          <Search className="w-12 h-12 text-[#27272a] mb-4" />
+          <h3 className="text-xl font-bold text-white mb-2">No projects found</h3>
+          <p className="text-primary-500">
+            We couldn't find anything matching your search criteria. Try removing some filters or searching for broader terms.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {courses.map((course) => (
-            <CourseCard
-              key={course._id}
-              course={course}
-              isEnrolled={enrolledCourseIds.includes(course._id)}
-            />
-          ))}
-        </div>
-      )}
+        <>
+          {pagination && (
+            <p className="text-sm font-medium uppercase tracking-wider text-primary-500 mb-6">
+              Showing {courses.length} of {pagination.total} results
+            </p>
+          )}
 
-      {/* Pagination */}
-      {pagination && pagination.pages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-4">
-          <button
-            onClick={() => setPage(page - 1)}
-            disabled={page === 1}
-            className="btn-ghost disabled:opacity-50"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((p) => (
-            <button
-              key={p}
-              onClick={() => setPage(p)}
-              className={`w-10 h-10 rounded-xl font-medium text-sm transition-all ${
-                p === page
-                  ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25'
-                  : 'hover:bg-surface-100 dark:hover:bg-surface-800 text-surface-600 dark:text-surface-400'
-              }`}
-            >
-              {p}
-            </button>
-          ))}
-          <button
-            onClick={() => setPage(page + 1)}
-            disabled={page === pagination.pages}
-            className="btn-ghost disabled:opacity-50"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {courses.map((course) => (
+              <CourseCard
+                key={course._id}
+                course={course}
+                isEnrolled={enrolledCourseIds.includes(course._id)}
+              />
+            ))}
+          </div>
+          
+          {/* Default Dark Pagination */}
+          {pagination && pagination.pages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-12">
+              <button
+                onClick={() => setPage(page - 1)}
+                disabled={page === 1}
+                className="btn-icon disabled:opacity-50"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`w-10 h-10 rounded-lg font-bold text-sm transition-all ${
+                    p === page
+                      ? 'bg-white text-black'
+                      : 'hover:bg-[#1d1d20] text-primary-400'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                onClick={() => setPage(page + 1)}
+                disabled={page === pagination.pages}
+                className="btn-icon disabled:opacity-50"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
