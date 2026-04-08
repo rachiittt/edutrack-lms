@@ -1,0 +1,11 @@
+{
+  "name": "edutrack-root",
+  "version": "1.0.0",
+  "description": "Root package.json for running frontend and backend concurrently",
+  "scripts": {
+    "install:all": "cd frontend && npm install && cd ../backend && npm install",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev": "npm run dev:frontend & npm run dev:backend"
+  }
+}
