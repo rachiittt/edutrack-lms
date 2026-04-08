@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Bell, Settings } from 'lucide-react';
+import { Search, Bell } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import CommandPalette from './CommandPalette';
 
