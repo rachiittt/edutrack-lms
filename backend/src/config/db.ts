@@ -9,6 +9,7 @@ class Database {
   private constructor() {}
 
   public static getInstance(): Database {
+    
     if (!Database.instance) {
       Database.instance = new Database();
     }
@@ -17,6 +18,7 @@ class Database {
 
   public async connect(): Promise<void> {
     if (this.isConnected) {
+
       console.log('📦 Using existing database connection');
       return;
     }
@@ -24,18 +26,22 @@ class Database {
     try {
       const conn = await mongoose.connect(config.mongoUri);
       this.isConnected = true;
-      console.log(`✅ MongoDB connected: ${conn.connection.host}`);
+      console.log(`MongoDB connected: ${conn.connection.host}`);
+
     } catch (error) {
-      console.error('❌ MongoDB connection error:', error);
+      console.error('MongoDB connection error:', error);
       process.exit(1);
+
     }
   }
 
   public async disconnect(): Promise<void> {
+
     if (!this.isConnected) return;
     await mongoose.disconnect();
     this.isConnected = false;
-    console.log('🔌 MongoDB disconnected');
+    console.log('MongoDB disconnected');
+
   }
 }
 
