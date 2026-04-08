@@ -71,7 +71,7 @@ const Login: React.FC = () => {
       </div>
 
       {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center p-6 bg-surface-50 dark:bg-surface-950">
+      <div className="flex-1 flex items-center justify-center p-6 bg-primary-950">
         <div className="w-full max-w-md">
           <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg shadow-primary-500/25">
@@ -80,20 +80,20 @@ const Login: React.FC = () => {
             <span className="text-2xl font-bold gradient-text">EduTrack</span>
           </div>
 
-          <h1 className="text-3xl font-bold text-surface-900 dark:text-white mb-2">
+          <h1 className="text-3xl font-bold text-white mb-2">
             Welcome back
           </h1>
-          <p className="text-surface-500 dark:text-surface-400 mb-8">
+          <p className="text-primary-400 mb-8">
             Sign in to your account to continue
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+              <label className="block text-sm font-medium text-primary-300 mb-2">
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-500" />
                 <input
                   type="email"
                   value={email}
@@ -110,7 +110,7 @@ const Login: React.FC = () => {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-500" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -122,7 +122,7 @@ const Login: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-primary-500 hover:text-primary-300 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -146,17 +146,17 @@ const Login: React.FC = () => {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-surface-500 dark:text-surface-400">
+            <p className="text-sm text-primary-400">
               Don't have an account?{' '}
-              <Link to="/register" className="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 transition-colors">
+              <Link to="/register" className="font-semibold text-blue-400 hover:text-blue-300 transition-colors">
                 Create one
               </Link>
             </p>
           </div>
 
           {/* Demo accounts */}
-          <div className="mt-8 p-4 rounded-xl bg-surface-100 dark:bg-surface-800/50 border border-surface-200 dark:border-surface-700">
-            <p className="text-xs font-semibold text-surface-500 dark:text-surface-400 mb-3 uppercase tracking-wider">
+          <div className="mt-8 p-4 rounded-xl bg-[#111111] border border-[#27272a]">
+            <p className="text-xs font-semibold text-primary-500 mb-3 uppercase tracking-wider">
               Demo Accounts
             </p>
             <div className="space-y-2">
@@ -171,15 +171,15 @@ const Login: React.FC = () => {
                     setEmail(demo.email);
                     setPassword('password123');
                   }}
-                  className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs hover:bg-surface-200 dark:hover:bg-surface-700 transition-colors text-left"
+                  className="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs hover:bg-[#1d1d20] transition-colors text-left"
                 >
-                  <span className="font-medium text-surface-700 dark:text-surface-300">
+                  <span className="font-medium text-primary-200">
                     {demo.role}
                   </span>
-                  <span className="text-surface-400">{demo.email}</span>
+                  <span className="text-primary-500">{demo.email}</span>
                 </button>
               ))}
-              <p className="text-xs text-surface-400 mt-1">Password: password123</p>
+              <p className="text-xs text-primary-500 mt-1">Password: password123</p>
             </div>
           </div>
         </div>

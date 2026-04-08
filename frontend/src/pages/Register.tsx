@@ -59,7 +59,7 @@ const Register: React.FC = () => {
       </div>
 
       {/* Right Panel - Form */}
-      <div className="flex-1 flex items-center justify-center p-6 bg-surface-50 dark:bg-surface-950">
+      <div className="flex-1 flex items-center justify-center p-6 bg-primary-950">
         <div className="w-full max-w-md">
           <div className="lg:hidden flex items-center gap-3 mb-8 justify-center">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg shadow-primary-500/25">
@@ -68,20 +68,20 @@ const Register: React.FC = () => {
             <span className="text-2xl font-bold gradient-text">EduTrack</span>
           </div>
 
-          <h1 className="text-3xl font-bold text-surface-900 dark:text-white mb-2">
+          <h1 className="text-3xl font-bold text-white mb-2">
             Create Account
           </h1>
-          <p className="text-surface-500 dark:text-surface-400 mb-8">
+          <p className="text-primary-400 mb-8">
             Join EduTrack to start learning today
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+              <label className="block text-sm font-medium text-primary-300 mb-2">
                 Full Name
               </label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-500" />
                 <input
                   type="text"
                   value={name}
@@ -98,7 +98,7 @@ const Register: React.FC = () => {
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-500" />
                 <input
                   type="email"
                   value={email}
@@ -115,7 +115,7 @@ const Register: React.FC = () => {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-surface-400" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-500" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -128,7 +128,7 @@ const Register: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-surface-400 hover:text-surface-600 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-primary-500 hover:text-primary-300 transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -148,8 +148,8 @@ const Register: React.FC = () => {
                     onClick={() => setRole(r as 'student' | 'teacher')}
                     className={`p-4 rounded-xl border-2 transition-all duration-200 text-center ${
                       role === r
-                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300'
-                        : 'border-surface-200 dark:border-surface-700 text-surface-600 dark:text-surface-400 hover:border-surface-300 dark:hover:border-surface-600'
+                        ? 'border-blue-500 bg-blue-500/10 text-blue-300'
+                        : 'border-[#27272a] text-primary-400 hover:border-[#3f3f46]'
                     }`}
                   >
                     <div className="text-2xl mb-1">{r === 'student' ? '🎓' : '👨‍🏫'}</div>
@@ -176,9 +176,9 @@ const Register: React.FC = () => {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-surface-500 dark:text-surface-400">
+            <p className="text-sm text-primary-400">
               Already have an account?{' '}
-              <Link to="/login" className="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 transition-colors">
+              <Link to="/login" className="font-semibold text-blue-400 hover:text-blue-300 transition-colors">
                 Sign in
               </Link>
             </p>
