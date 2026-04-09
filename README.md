@@ -107,3 +107,11 @@ npm run seed
 - **Singleton** — MongoDB connection (`db.ts`)
 - **Context Provider** — React auth state management
 - **Protected Routes** — HOC with role-based guarding
+
+## 👨‍💻 Created By
+
+- Satyam Kumar  
+- Kavya Saraswat  
+- Mausam Kumar  
+- Rachit Singh  
+- Himank Kaushik  
