@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { GraduationCap, Mail, Lock, User, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { getApiError } from '../utils/apiErrorHandler';
 const Register: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -23,8 +24,8 @@ const Register: React.FC = () => {
       await register(name, email, password, role);
       toast.success('Account created successfully!');
       navigate('/dashboard');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Registration failed');
+    } catch (error) {
+      toast.error(getApiError(error, 'Registration failed'));
     } finally {
       setIsLoading(false);
     }

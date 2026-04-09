@@ -2,7 +2,7 @@ import api from './api';
 import { ApiResponse, CoursesResponse, Course } from '../types';
 export const courseService = {
   getAll: async (params?: { page?: number; limit?: number; search?: string; category?: string }) => {
-    const response = await api.get<ApiResponse<CoursesResponse>>('/courses', { params });
+    const response = await api.get<ApiResponse<Course[]>>('/courses', { params });
     return response.data;
   },
   getById: async (id: string) => {

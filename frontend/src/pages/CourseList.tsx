@@ -35,8 +35,8 @@ const CourseList: React.FC = () => {
       if (search) params.search = search;
       if (category) params.category = category;
       const response = await courseService.getAll(params);
-      setCourses(response.data.courses);
-      setPagination(response.data.pagination);
+      setCourses(response.data || []);
+      setPagination(response.pagination || null);
     } catch (error) {
       console.error('Failed to load courses:', error);
     } finally {

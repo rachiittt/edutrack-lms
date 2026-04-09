@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { courseService } from '../services/courseService';
 import toast from 'react-hot-toast';
+import { getApiError } from '../utils/apiErrorHandler';
 import { ArrowLeft, Save, Layout, Settings, Image as ImageIcon } from 'lucide-react';
 import classNames from 'classnames';
 const CreateCourse: React.FC = () => {
@@ -29,8 +30,8 @@ const CreateCourse: React.FC = () => {
       const response = await courseService.create({ title, description, category, thumbnail });
       toast.success('Project created successfully!');
       navigate(`/courses/${response.data.course._id}`);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to create');
+    } catch (error) {
+      toast.error(getApiError(error, 'Failed to create'));
     } finally {
       setIsLoading(false);
     }

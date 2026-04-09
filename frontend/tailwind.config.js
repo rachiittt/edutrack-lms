@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+
 export default {
   content: [
     "./index.html",
@@ -8,7 +8,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Linear/Vercel inspired ultra-sleek palette
+        
         primary: {
           50: '#fafafa',
           100: '#f4f4f5',
@@ -19,16 +19,16 @@ export default {
           600: '#52525b',
           700: '#3f3f46',
           800: '#27272a',
-          900: '#18181b', // Main background dark
-          950: '#09090b', // Deepest background
+          900: '#18181b', 
+          950: '#09090b', 
         },
         accent: {
           light: '#ffffff',
           dark: '#ededed',
-          brand: '#3b82f6', // Subtle blue for specific highlights if needed
+          brand: '#3b82f6', 
         },
         surface: {
-          // Used for panels/widgets
+          
           light: '#ffffff',
           dark: '#111111', 
           border: '#27272a',

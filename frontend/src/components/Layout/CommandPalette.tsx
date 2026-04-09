@@ -16,9 +16,18 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose }) => {
     { title: 'Browse Courses', icon: BookOpen, path: '/courses', category: 'Navigation' },
     { title: 'My Learning', icon: GraduationCap, path: '/my-courses', category: 'Navigation' },
   ];
-  const filteredCommands = query === ''
+  let filteredCommands = query === ''
     ? commands
     : commands.filter(cmd => cmd.title.toLowerCase().includes(query.toLowerCase()));
+
+  if (query !== '' && filteredCommands.length === 0) {
+    filteredCommands = [{
+       title: `Search catalog for "${query}"`,
+       icon: Search,
+       path: `/courses?search=${encodeURIComponent(query)}`,
+       category: 'Search'
+    }];
+  }
   useEffect(() => {
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 10);

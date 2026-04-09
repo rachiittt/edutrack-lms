@@ -61,6 +61,7 @@ export interface ApiResponse<T> {
   success: boolean;
   message?: string;
   data: T;
+  pagination?: PaginationInfo;
 }
 export interface PaginationInfo {
   page: number;

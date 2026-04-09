@@ -29,7 +29,7 @@ const Dashboard: React.FC = () => {
     try {
       if (user?.role === 'teacher') {
         const response = await courseService.getAll({ teacher: user._id, limit: 50 } as any);
-        const courses = response.data?.courses || [];
+        const courses = response.data || [];
         setCourses(courses);
         const totalStudents = courses.reduce(
           (sum: number, c: Course) => sum + (c.enrollmentCount || 0),
@@ -38,7 +38,7 @@ const Dashboard: React.FC = () => {
         setStats({ totalCourses: courses.length, totalStudents });
       } else {
         const response = await courseService.getAll({ limit: 4 });
-        const courses = response.data?.courses || [];
+        const courses = response.data || [];
         setCourses(courses);
       }
     } catch (error) {

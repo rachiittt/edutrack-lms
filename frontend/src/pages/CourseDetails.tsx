@@ -25,6 +25,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { formatDate } from '../utils/formatters';
+import { getApiError } from '../utils/apiErrorHandler';
 const CourseDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { user, refreshEnrollments } = useAuth();
@@ -79,8 +80,8 @@ const CourseDetails: React.FC = () => {
       toast.success('Enrolled successfully!');
       refreshEnrollments();
       loadCourse();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to enroll');
+    } catch (error) {
+      toast.error(getApiError(error, 'Failed to enroll'));
     } finally {
       setEnrolling(false);
     }
@@ -91,8 +92,8 @@ const CourseDetails: React.FC = () => {
       await courseService.delete(id);
       toast.success('Project deleted');
       navigate('/courses');
-    } catch (error: any) {
-      toast.error('Failed to delete');
+    } catch (error) {
+      toast.error(getApiError(error, 'Failed to delete'));
     }
   };
   if (loading) return <div className="flex justify-center items-center h-[60vh]"><LoadingSpinner size="lg" /></div>;
