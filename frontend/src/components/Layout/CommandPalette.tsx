@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, LayoutDashboard, BookOpen, GraduationCap, ArrowRight } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { Search, LayoutDashboard, BookOpen, GraduationCap, ArrowRight, FolderPlus, Award } from 'lucide-react';
 import classNames from 'classnames';
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -11,11 +12,23 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ isOpen, onClose }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
-  const commands = [
-    { title: 'Go to Workspace', icon: LayoutDashboard, path: '/dashboard', category: 'Navigation' },
-    { title: 'Browse Courses', icon: BookOpen, path: '/courses', category: 'Navigation' },
-    { title: 'My Learning', icon: GraduationCap, path: '/my-courses', category: 'Navigation' },
-  ];
+  const { user } = useAuth();
+
+  const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
+
+  const commands = isTeacher
+    ? [
+        { title: 'Go to Workspace', icon: LayoutDashboard, path: '/dashboard', category: 'Navigation' },
+        { title: 'Browse Courses', icon: BookOpen, path: '/courses', category: 'Navigation' },
+        { title: 'My Projects', icon: FolderPlus, path: '/my-courses', category: 'Navigation' },
+        { title: 'Studio', icon: FolderPlus, path: '/create-course', category: 'Navigation' },
+      ]
+    : [
+        { title: 'Go to Workspace', icon: LayoutDashboard, path: '/dashboard', category: 'Navigation' },
+        { title: 'Browse Courses', icon: BookOpen, path: '/courses', category: 'Navigation' },
+        { title: 'My Learning', icon: GraduationCap, path: '/my-courses', category: 'Navigation' },
+        { title: 'Achievements', icon: Award, path: '/my-results', category: 'Navigation' },
+      ];
   let filteredCommands = query === ''
     ? commands
     : commands.filter(cmd => cmd.title.toLowerCase().includes(query.toLowerCase()));

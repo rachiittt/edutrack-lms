@@ -17,15 +17,21 @@ const FloatingDock: React.FC = () => {
     logout();
     navigate('/login');
   };
-  const navItems = [
-    { name: 'Workspace', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Browse', path: '/courses', icon: BookOpen },
-    { name: 'My Learning', path: '/my-courses', icon: GraduationCap },
-    { name: 'Achievements', path: '/my-results', icon: Award },
-    ...(user?.role === 'teacher' || user?.role === 'admin'
-      ? [{ name: 'Studio', path: '/create-course', icon: FolderPlus }]
-      : []),
-  ];
+  const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
+
+  const navItems = isTeacher
+    ? [
+        { name: 'Workspace', path: '/dashboard', icon: LayoutDashboard },
+        { name: 'Browse', path: '/courses', icon: BookOpen },
+        { name: 'My Projects', path: '/my-courses', icon: FolderPlus },
+        { name: 'Studio', path: '/create-course', icon: FolderPlus },
+      ]
+    : [
+        { name: 'Workspace', path: '/dashboard', icon: LayoutDashboard },
+        { name: 'Browse', path: '/courses', icon: BookOpen },
+        { name: 'My Learning', path: '/my-courses', icon: GraduationCap },
+        { name: 'Achievements', path: '/my-results', icon: Award },
+      ];
   return (
     <aside className="fixed left-0 top-0 bottom-0 z-40 flex flex-col items-center py-6 px-3 bg-[#09090b] border-r border-[#27272a] w-[72px] transition-all duration-300 group hover:w-[240px] overflow-hidden">
       {}
