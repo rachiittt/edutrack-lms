@@ -23,7 +23,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuToggle }) => {
               Welcome back,
             </h2>
             <p className="text-lg font-semibold text-surface-900 dark:text-white">
-              {user?.name} 👋
+              {user?.name}
             </p>
           </div>
         </div>
