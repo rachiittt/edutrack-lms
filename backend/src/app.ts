@@ -10,7 +10,7 @@ const app = express();
 const logger = Logger.createLogger('App');
 app.use(
   cors({
-    origin: [config.frontendUrl, 'http://localhost:5174'],
+    origin: config.nodeEnv === 'production' ? config.frontendUrl : true,
     credentials: true,
   })
 );

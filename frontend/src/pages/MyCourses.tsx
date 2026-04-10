@@ -19,7 +19,7 @@ const MyCourses: React.FC = () => {
     try {
       if (user?.role === 'teacher') {
         const response = await courseService.getAll({ teacher: user._id, limit: 50 } as any);
-        setTeacherCourses(response.data || []);
+        setTeacherCourses(response.data?.courses || []);
       }
     } catch (error) {
       console.error('Failed to load courses:', error);
