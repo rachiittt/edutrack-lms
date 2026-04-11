@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { quizService } from '../services/quizService';
-import type { Quiz } from '../types';
+import type { Quiz, QuizResult } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
 import { ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import classNames from 'classnames';
+import { getApiError } from '../utils/apiErrorHandler';
 const QuizPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -14,8 +15,32 @@ const QuizPage: React.FC = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<QuizResult | null>(null);
   const [timeLeft, setTimeLeft] = useState(0);
+  const handleSubmitRef = useRef<() => void>(() => {});
+  const handleSubmit = useCallback(async () => {
+    if (!id || !quiz) return;
+    const finalAnswers = answers.map((a) => (a === -1 ? 0 : a));
+    setSubmitting(true);
+    try {
+      const response = await quizService.attempt(id, finalAnswers);
+      setResult(response.data.result);
+      toast.success('Assessment submitted!');
+    } catch (error) {
+      const msg = getApiError(error, 'Failed to submit');
+      if (msg.toLowerCase().includes('already attempted')) {
+        toast.error('You have already taken this assessment');
+        navigate(-1);
+      } else {
+        toast.error(msg);
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  }, [id, quiz, answers, navigate]);
+  useEffect(() => {
+    handleSubmitRef.current = handleSubmit;
+  }, [handleSubmit]);
   useEffect(() => {
     loadQuiz();
   }, [id]);
@@ -26,7 +51,7 @@ const QuizPage: React.FC = () => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
-          handleSubmit();
+          handleSubmitRef.current();
           return 0;
         }
         return prev - 1;
@@ -57,25 +82,6 @@ const QuizPage: React.FC = () => {
     const newAnswers = [...answers];
     newAnswers[currentQuestion] = optionIndex;
     setAnswers(newAnswers);
-  };
-  const handleSubmit = async () => {
-    if (!id || !quiz) return;
-    const finalAnswers = answers.map((a) => (a === -1 ? 0 : a));
-    setSubmitting(true);
-    try {
-      const response = await quizService.attempt(id, finalAnswers);
-      setResult(response.data.result);
-      toast.success('Assessment submitted!');
-    } catch (error: any) {
-      if (error.response?.data?.message?.includes('already attempted')) {
-        toast.error('You have already taken this assessment');
-        navigate(-1);
-      } else {
-        toast.error(error.response?.data?.message || 'Failed to submit');
-      }
-    } finally {
-      setSubmitting(false);
-    }
   };
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

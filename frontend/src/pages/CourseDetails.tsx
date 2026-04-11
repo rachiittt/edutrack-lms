@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { courseService } from '../services/courseService';
 import { materialService } from '../services/materialService';
 import { quizService } from '../services/quizService';
-import { Course, Material, Quiz } from '../types';
+import { Course, Material, Quiz, StudentEnrollment } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
 import api from '../services/api';
@@ -37,7 +37,7 @@ const CourseDetails: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
   const [activeItem, setActiveItem] = useState<string>('overview');
-  const [students, setStudents] = useState<any[]>([]);
+  const [students, setStudents] = useState<StudentEnrollment[]>([]);
   const isTeacherOwner = user?.role === 'teacher' && course?.teacher?._id === user?._id;
   useEffect(() => {
     loadCourse();

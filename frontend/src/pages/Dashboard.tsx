@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { courseService } from '../services/courseService';
-import { Course } from '../types';
+import { quizService } from '../services/quizService';
+import { Course, QuizResult } from '../types';
 import CourseCard from '../components/CourseCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import {
@@ -22,13 +23,14 @@ const Dashboard: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ totalCourses: 0, totalStudents: 0 });
+  const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   useEffect(() => {
     loadData();
   }, [user]);
   const loadData = async () => {
     try {
       if (user?.role === 'teacher') {
-        const response = await courseService.getAll({ teacher: user._id, limit: 50 } as any);
+        const response = await courseService.getAll({ teacher: user._id, limit: 50 });
         const courses = response.data?.courses || [];
         setCourses(courses);
         const totalStudents = courses.reduce(
@@ -40,6 +42,12 @@ const Dashboard: React.FC = () => {
         const response = await courseService.getAll({ limit: 4 });
         const courses = response.data?.courses || [];
         setCourses(courses);
+        try {
+          const resultsRes = await quizService.getMyResults();
+          setQuizResults(resultsRes.data.results || []);
+        } catch (error) {
+          console.error('Failed to load quiz results for dashboard:', error);
+        }
       }
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
@@ -47,9 +55,42 @@ const Dashboard: React.FC = () => {
       setLoading(false);
     }
   };
-  const enrolledCourseIds = enrollments.map((e) =>
-    typeof e.course === 'object' ? e.course._id : e.course
-  );
+  const passedQuizzes = quizResults.filter(
+    (r) => Math.round((r.score / r.totalQuestions) * 100) >= 60
+  ).length;
+  const averageScore =
+    quizResults.length > 0
+      ? Math.round(
+          quizResults.reduce(
+            (sum, r) => sum + (r.score / r.totalQuestions) * 100,
+            0
+          ) / quizResults.length
+        )
+      : 0;
+  const buildHeatmapData = () => {
+    const activityDays = new Set<string>();
+    enrollments.forEach((e) => {
+      if (e.enrolledAt) {
+        activityDays.add(new Date(e.enrolledAt).toDateString());
+      }
+    });
+    quizResults.forEach((r) => {
+      if (r.submittedAt) {
+        activityDays.add(new Date(r.submittedAt).toDateString());
+      }
+    });
+    return Array.from({ length: 42 }).map((_, i) => {
+      const date = new Date(Date.now() - (41 - i) * 24 * 60 * 60 * 1000);
+      const dateStr = date.toDateString();
+      const hasActivity = activityDays.has(dateStr);
+      return {
+        date,
+        level: hasActivity ? 3 : 0,
+      };
+    });
+  };
+  const heatmapData = buildHeatmapData();
+  const activeDaysCount = heatmapData.filter((d) => d.level > 0).length;
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full min-h-[60vh]">
@@ -57,10 +98,6 @@ const Dashboard: React.FC = () => {
       </div>
     );
   }
-  const heatmapData = Array.from({ length: 42 }).map((_, i) => ({
-    date: new Date(Date.now() - (41 - i) * 24 * 60 * 60 * 1000),
-    level: Math.random() > 0.6 ? Math.floor(Math.random() * 4) + 1 : 0
-  }));
   return (
     <div className="space-y-6 animate-fade-in pb-10">
       {}
@@ -96,8 +133,8 @@ const Dashboard: React.FC = () => {
               </h2>
               <p className="text-primary-400">
                 {user?.role === 'teacher'
-                  ? 'Your courses have reached 12 new students this week. Keep up the momentum in the studio.'
-                  : `You have ${enrollments.length} active enrollments. You're on a 5-day learning streak.`}
+                  ? `You have ${stats.totalStudents} total student${stats.totalStudents !== 1 ? 's' : ''} across ${stats.totalCourses} course${stats.totalCourses !== 1 ? 's' : ''}.`
+                  : `You have ${enrollments.length} active enrollment${enrollments.length !== 1 ? 's' : ''}${quizResults.length > 0 ? ` and completed ${quizResults.length} quiz${quizResults.length !== 1 ? 'zes' : ''}.` : '.'}`}
               </p>
             </div>
             <div className="flex items-center gap-6">
@@ -112,13 +149,10 @@ const Dashboard: React.FC = () => {
               <div className="w-[1px] h-10 bg-[#27272a]"></div>
               <div className="flex flex-col">
                 <span className="text-3xl font-bold text-white tracking-tight flex items-baseline gap-1">
-                  {user?.role === 'teacher' ? stats.totalCourses : '8'}
-                  <span className="text-sm font-normal text-primary-500">
-                    {user?.role === 'teacher' ? '' : 'hrs'}
-                  </span>
+                  {user?.role === 'teacher' ? stats.totalCourses : quizResults.length}
                 </span>
                 <span className="text-xs text-primary-500 uppercase tracking-wider font-semibold">
-                  {user?.role === 'teacher' ? 'Active Courses' : 'Time Learned'}
+                  {user?.role === 'teacher' ? 'Active Courses' : 'Quizzes Taken'}
                 </span>
               </div>
             </div>
@@ -150,15 +184,12 @@ const Dashboard: React.FC = () => {
               ))}
             </div>
             <div className="mt-4 flex items-center justify-between text-xs text-primary-500 font-medium">
-              <span>Less</span>
+              <span>{activeDaysCount} active day{activeDaysCount !== 1 ? 's' : ''}</span>
               <div className="flex gap-1.5">
                 <div className="w-3 h-3 rounded-sm bg-[#27272a]" />
-                <div className="w-3 h-3 rounded-sm bg-green-900/40" />
-                <div className="w-3 h-3 rounded-sm bg-green-700/60" />
                 <div className="w-3 h-3 rounded-sm bg-green-500/80" />
-                <div className="w-3 h-3 rounded-sm bg-green-400" />
               </div>
-              <span>More</span>
+              <span>Inactive / Active</span>
             </div>
           </div>
         </div>
@@ -168,24 +199,28 @@ const Dashboard: React.FC = () => {
             <Trophy className="w-5 h-5 text-yellow-500" />
             <h3 className="text-sm font-semibold text-primary-200">Achievements</h3>
           </div>
-          <p className="text-2xl font-bold text-white mb-1">12</p>
-          <p className="text-xs text-primary-500">Certificates earned</p>
+          <p className="text-2xl font-bold text-white mb-1">{passedQuizzes}</p>
+          <p className="text-xs text-primary-500">Quiz{passedQuizzes !== 1 ? 'zes' : ''} passed (≥60%)</p>
         </div>
         <div className="widget-panel col-span-1 md:col-span-2 lg:col-span-2 p-5">
           <div className="flex items-center gap-3 mb-2">
             <Clock className="w-5 h-5 text-blue-500" />
-            <h3 className="text-sm font-semibold text-primary-200">Current Streak</h3>
+            <h3 className="text-sm font-semibold text-primary-200">Quizzes Taken</h3>
           </div>
-          <p className="text-2xl font-bold text-white mb-1">5 Days</p>
-          <p className="text-xs text-primary-500">Personal best is 14 days</p>
+          <p className="text-2xl font-bold text-white mb-1">{quizResults.length}</p>
+          <p className="text-xs text-primary-500">Total assessments completed</p>
         </div>
         <div className="widget-panel col-span-1 md:col-span-2 lg:col-span-2 p-5">
           <div className="flex items-center gap-3 mb-2">
             <TrendingUp className="w-5 h-5 text-purple-500" />
             <h3 className="text-sm font-semibold text-primary-200">Avg Score</h3>
           </div>
-          <p className="text-2xl font-bold text-white mb-1">94%</p>
-          <p className="text-xs text-primary-500">Top 10% of learners</p>
+          <p className="text-2xl font-bold text-white mb-1">{averageScore > 0 ? `${averageScore}%` : '—'}</p>
+          <p className="text-xs text-primary-500">
+            {quizResults.length > 0
+              ? `Across ${quizResults.length} quiz${quizResults.length !== 1 ? 'zes' : ''}`
+              : 'No quizzes taken yet'}
+          </p>
         </div>
         {}
         <div className="col-span-1 md:col-span-4 lg:col-span-6 mt-4">

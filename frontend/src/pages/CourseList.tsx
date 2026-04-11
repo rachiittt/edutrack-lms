@@ -31,7 +31,7 @@ const CourseList: React.FC = () => {
   const loadCourses = async () => {
     setLoading(true);
     try {
-      const params: any = { page, limit: 12 };
+      const params: { page: number; limit: number; search?: string; category?: string } = { page, limit: 12 };
       if (search) params.search = search;
       if (category) params.category = category;
       const response = await courseService.getAll(params);

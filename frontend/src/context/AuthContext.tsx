@@ -46,7 +46,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       const response = await api.get('/enrollments/my');
       setEnrollments(response.data.data.enrollments);
-    } catch {
+    } catch (error) {
+      console.error('Failed to refresh enrollments:', error);
     }
   };
   const login = async (email: string, password: string) => {

@@ -1,7 +1,7 @@
 import api from './api';
 import { ApiResponse, CoursesResponse, Course } from '../types';
 export const courseService = {
-  getAll: async (params?: { page?: number; limit?: number; search?: string; category?: string }) => {
+  getAll: async (params?: { page?: number; limit?: number; search?: string; category?: string; teacher?: string }) => {
     const response = await api.get<ApiResponse<CoursesResponse>>('/courses', { params });
     return response.data;
   },

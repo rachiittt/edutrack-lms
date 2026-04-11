@@ -77,3 +77,10 @@ export interface AuthResponse {
   user: User;
   token: string;
 }
+export interface StudentEnrollment {
+  _id: string;
+  student: User;
+  course: string | Course;
+  enrolledAt: string;
+  progress: number;
+}

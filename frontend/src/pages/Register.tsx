@@ -90,7 +90,7 @@ const Register: React.FC = () => {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+              <label className="block text-sm font-medium text-primary-300 mb-2">
                 Email Address
               </label>
               <div className="relative">
@@ -106,7 +106,7 @@ const Register: React.FC = () => {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+              <label className="block text-sm font-medium text-primary-300 mb-2">
                 Password
               </label>
               <div className="relative">
@@ -131,7 +131,7 @@ const Register: React.FC = () => {
             </div>
             {}
             <div>
-              <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-2">
+              <label className="block text-sm font-medium text-primary-300 mb-2">
                 I am a
               </label>
               <div className="grid grid-cols-2 gap-3">
