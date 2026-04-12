@@ -24,7 +24,11 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('edutrack_token');
       localStorage.removeItem('edutrack_user');
-      window.location.href = '/login';
+      
+      const isAuthUrl = error.config?.url?.includes('/auth/login') || error.config?.url?.includes('/auth/register');
+      if (!isAuthUrl) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

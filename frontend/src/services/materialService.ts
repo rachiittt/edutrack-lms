@@ -5,17 +5,19 @@ export const materialService = {
     const response = await api.get<ApiResponse<{ materials: Material[] }>>(
       `/materials/courses/${courseId}/materials`
     );
-    return response.data;
+    return response.data.data.materials;
   },
-  create: async (courseId: string, data: { title: string; type: string; content: string }) => {
+  create: async (
+    courseId: string,
+    data: { title: string; type: Material['type']; content: string }
+  ) => {
     const response = await api.post<ApiResponse<{ material: Material }>>(
       `/materials/courses/${courseId}/materials`,
       data
     );
-    return response.data;
+    return response.data.data.material;
   },
   delete: async (materialId: string) => {
-    const response = await api.delete<ApiResponse<null>>(`/materials/${materialId}`);
-    return response.data;
+    await api.delete<ApiResponse<null>>(`/materials/${materialId}`);
   },
 };

@@ -3,26 +3,25 @@ import { ApiResponse, CoursesResponse, Course } from '../types';
 export const courseService = {
   getAll: async (params?: { page?: number; limit?: number; search?: string; category?: string; teacher?: string }) => {
     const response = await api.get<ApiResponse<CoursesResponse>>('/courses', { params });
-    return response.data;
+    return response.data.data;
   },
   getById: async (id: string) => {
     const response = await api.get<ApiResponse<{ course: Course }>>(`/courses/${id}`);
-    return response.data;
+    return response.data.data.course;
   },
   create: async (data: { title: string; description: string; category: string; thumbnail?: string }) => {
     const response = await api.post<ApiResponse<{ course: Course }>>('/courses', data);
-    return response.data;
+    return response.data.data.course;
   },
   update: async (id: string, data: Partial<Course>) => {
     const response = await api.put<ApiResponse<{ course: Course }>>(`/courses/${id}`, data);
-    return response.data;
+    return response.data.data.course;
   },
   delete: async (id: string) => {
-    const response = await api.delete<ApiResponse<null>>(`/courses/${id}`);
-    return response.data;
+    await api.delete<ApiResponse<null>>(`/courses/${id}`);
   },
   getCategories: async () => {
     const response = await api.get<ApiResponse<{ categories: string[] }>>('/courses/categories');
-    return response.data;
+    return response.data.data.categories;
   },
 };

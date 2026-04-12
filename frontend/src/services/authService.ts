@@ -8,17 +8,17 @@ export const authService = {
       password,
       role,
     });
-    return response.data;
+    return response.data.data;
   },
   login: async (email: string, password: string) => {
     const response = await api.post<ApiResponse<AuthResponse>>('/auth/login', {
       email,
       password,
     });
-    return response.data;
+    return response.data.data;
   },
   getProfile: async () => {
     const response = await api.get<ApiResponse<{ user: AuthResponse['user'] }>>('/auth/me');
-    return response.data;
+    return response.data.data.user;
   },
 };
