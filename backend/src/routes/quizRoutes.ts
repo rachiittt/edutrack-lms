@@ -43,12 +43,12 @@ router.post(
   ]),
   QuizController.attempt
 );
-router.get('/:id', authenticate, QuizController.getById);
-router.get('/:id/results', authenticate, QuizController.getResults);
 router.get(
   '/my/results',
   authenticate,
   roleGuard('student'),
   QuizController.getMyResults
 );
+router.get('/:id', authenticate, QuizController.getById);
+router.get('/:id/results', authenticate, QuizController.getResults);
 export default router;

@@ -42,6 +42,7 @@ export class CourseController {
       const course = await container.courseService.update(
         req.params.id,
         req.user!._id.toString(),
+        req.user!.role,
         req.body
       );
       ApiResponse.success(res, { course }, 'Course updated successfully');
@@ -51,7 +52,11 @@ export class CourseController {
   }
   static async delete(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      await container.courseService.delete(req.params.id, req.user!._id.toString());
+      await container.courseService.delete(
+        req.params.id,
+        req.user!._id.toString(),
+        req.user!.role
+      );
       ApiResponse.success(res, null, 'Course deleted successfully');
     } catch (error) {
       next(error);

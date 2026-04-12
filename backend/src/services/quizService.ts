@@ -32,13 +32,18 @@ export class QuizService implements IQuizService {
   async create(
     courseId: string,
     teacherId: string,
+    userRole: string,
     data: Partial<IQuiz>
   ): Promise<IQuiz> {
     const course = await this.courseRepository.findById(courseId);
     if (!course) {
       throw ApiError.notFound('Course not found');
     }
-    if (course.teacher._id?.toString() !== teacherId && course.teacher.toString() !== teacherId) {
+    if (
+      userRole !== 'admin' &&
+      course.teacher._id?.toString() !== teacherId &&
+      course.teacher.toString() !== teacherId
+    ) {
       throw ApiError.forbidden('You can only create quizzes for your own courses');
     }
     const quiz = await this.quizRepository.create({

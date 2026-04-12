@@ -8,6 +8,7 @@ export class MaterialController {
       const material = await container.materialService.create(
         req.params.id,
         req.user!._id.toString(),
+        req.user!.role,
         req.body
       );
       ApiResponse.created(res, { material }, 'Material added successfully');
@@ -25,7 +26,11 @@ export class MaterialController {
   }
   static async delete(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      await container.materialService.delete(req.params.id, req.user!._id.toString());
+      await container.materialService.delete(
+        req.params.id,
+        req.user!._id.toString(),
+        req.user!.role
+      );
       ApiResponse.success(res, null, 'Material deleted successfully');
     } catch (error) {
       next(error);

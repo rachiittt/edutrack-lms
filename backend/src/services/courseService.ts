@@ -33,24 +33,37 @@ export class CourseService implements ICourseService {
     }
     return course;
   }
-  async update(id: string, teacherId: string, data: Partial<ICourse>): Promise<ICourse> {
+  async update(
+    id: string,
+    teacherId: string,
+    userRole: string,
+    data: Partial<ICourse>
+  ): Promise<ICourse> {
     const course = await this.courseRepository.findById(id);
     if (!course) {
       throw ApiError.notFound('Course not found');
     }
-    if (course.teacher._id?.toString() !== teacherId && course.teacher.toString() !== teacherId) {
+    if (
+      userRole !== 'admin' &&
+      course.teacher._id?.toString() !== teacherId &&
+      course.teacher.toString() !== teacherId
+    ) {
       throw ApiError.forbidden('You can only update your own courses');
     }
     const updated = await this.courseRepository.update(id, data);
     this.logger.info(`Course updated: ${id}`);
     return updated!;
   }
-  async delete(id: string, teacherId: string): Promise<void> {
+  async delete(id: string, teacherId: string, userRole: string): Promise<void> {
     const course = await this.courseRepository.findById(id);
     if (!course) {
       throw ApiError.notFound('Course not found');
     }
-    if (course.teacher._id?.toString() !== teacherId && course.teacher.toString() !== teacherId) {
+    if (
+      userRole !== 'admin' &&
+      course.teacher._id?.toString() !== teacherId &&
+      course.teacher.toString() !== teacherId
+    ) {
       throw ApiError.forbidden('You can only delete your own courses');
     }
     await this.courseRepository.delete(id);

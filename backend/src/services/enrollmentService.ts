@@ -45,12 +45,20 @@ export class EnrollmentService implements IEnrollmentService {
   async getMyEnrollments(studentId: string): Promise<IEnrollment[]> {
     return this.enrollmentRepository.findByStudent(studentId);
   }
-  async getCourseEnrollments(courseId: string, teacherId: string): Promise<IEnrollment[]> {
+  async getCourseEnrollments(
+    courseId: string,
+    teacherId: string,
+    userRole: string
+  ): Promise<IEnrollment[]> {
     const course = await this.courseRepository.findById(courseId);
     if (!course) {
       throw ApiError.notFound('Course not found');
     }
-    if (course.teacher._id?.toString() !== teacherId && course.teacher.toString() !== teacherId) {
+    if (
+      userRole !== 'admin' &&
+      course.teacher._id?.toString() !== teacherId &&
+      course.teacher.toString() !== teacherId
+    ) {
       throw ApiError.forbidden('You can only view enrollments for your own courses');
     }
     return this.enrollmentRepository.findByCourse(courseId);

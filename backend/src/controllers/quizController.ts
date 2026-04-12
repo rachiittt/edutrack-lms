@@ -8,6 +8,7 @@ export class QuizController {
       const quiz = await container.quizService.create(
         req.params.id,
         req.user!._id.toString(),
+        req.user!.role,
         req.body
       );
       ApiResponse.created(res, { quiz }, 'Quiz created successfully');

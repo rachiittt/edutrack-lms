@@ -28,7 +28,8 @@ export class EnrollmentController {
     try {
       const enrollments = await container.enrollmentService.getCourseEnrollments(
         req.params.id,
-        req.user!._id.toString()
+        req.user!._id.toString(),
+        req.user!.role
       );
       ApiResponse.success(res, { enrollments });
     } catch (error) {
