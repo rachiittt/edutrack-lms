@@ -27,9 +27,9 @@ const CreateCourse: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await courseService.create({ title, description, category, thumbnail });
-      toast.success('Project created successfully!');
-      navigate(`/courses/${response.data.course._id}`);
+      const course = await courseService.create({ title, description, category, thumbnail });
+      toast.success('Course created successfully!');
+      navigate(`/courses/${course._id}`);
     } catch (error) {
       toast.error(getApiError(error, 'Failed to create'));
     } finally {
@@ -37,15 +37,14 @@ const CreateCourse: React.FC = () => {
     }
   };
   return (
-    <div className="flex h-[calc(100vh-120px)] -mx-6 -mt-6 bg-[#09090b]">
-      {}
-      <div className="w-[500px] border-r border-[#27272a] bg-[#111111] flex flex-col pt-6 overflow-y-auto">
+    <div className="-mx-4 -mt-6 flex min-h-[calc(100vh-120px)] flex-col bg-[#09090b] md:-mx-8 lg:grid lg:grid-cols-[500px_minmax(0,1fr)]">
+      <div className="flex flex-col overflow-y-auto border-b border-[#27272a] bg-[#111111] pt-6 lg:border-b-0 lg:border-r">
         <div className="px-6 pb-6 border-b border-[#27272a]">
           <button onClick={() => navigate(-1)} className="flex items-center text-xs font-semibold text-primary-500 hover:text-white uppercase tracking-wider mb-6 transition-colors">
-            <ArrowLeft className="w-3 h-3 mr-2" /> Exit Studio
+            <ArrowLeft className="w-3 h-3 mr-2" /> Back
           </button>
-          <h1 className="text-2xl font-bold text-white mb-1">New Project Setup</h1>
-          <p className="text-primary-400 text-sm">Configure the metadata for your new project.</p>
+          <h1 className="text-2xl font-bold text-white mb-1">Create Course</h1>
+          <p className="text-primary-400 text-sm">Set up the details students will see before enrollment.</p>
         </div>
         <div className="flex px-6 pt-4 gap-4 border-b border-[#27272a]">
           <button
@@ -71,7 +70,7 @@ const CreateCourse: React.FC = () => {
           {activeTab === 'details' && (
             <div className="space-y-6 animate-fade-in">
               <div>
-                <label className="block text-xs font-semibold text-primary-300 uppercase tracking-wider mb-2">Project Title</label>
+                <label className="block text-xs font-semibold text-primary-300 uppercase tracking-wider mb-2">Course Title</label>
                 <input
                   type="text"
                   value={title}
@@ -87,7 +86,7 @@ const CreateCourse: React.FC = () => {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className="w-full bg-[#1d1d20] border border-[#27272a] text-white px-4 py-3 rounded-lg min-h-[200px] resize-none focus:outline-none focus:border-blue-500 transition-colors"
-                  placeholder="What will this project cover?"
+                  placeholder="What will students learn in this course?"
                   required
                 />
               </div>
@@ -130,19 +129,17 @@ const CreateCourse: React.FC = () => {
              disabled={isLoading || !title || !description || !category}
              className="w-full bg-white text-black font-bold py-3 rounded-lg hover:bg-primary-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
            >
-             {isLoading ? 'Creating...' : <><Save className="w-4 h-4" /> Publish to Studio</>}
+             {isLoading ? 'Creating...' : <><Save className="w-4 h-4" /> Publish Course</>}
            </button>
         </div>
       </div>
-      {}
-      <div className="flex-1 bg-grid p-12 flex flex-col items-center justify-center relative overflow-hidden">
+      <div className="relative flex flex-col items-center justify-center overflow-hidden bg-grid p-8 md:p-12">
         <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent pointer-events-none" />
         <div className="text-center mb-8 z-10 w-full max-w-2xl text-left">
           <div className="text-[10px] text-primary-500 font-bold uppercase tracking-widest mb-2 flex items-center gap-2">
             <Layout className="w-4 h-4" /> Live Preview
           </div>
         </div>
-        {}
         <div className="widget-panel w-full max-w-sm h-[360px] flex flex-col relative z-10 shadow-2xl scale-100 transition-all duration-300 border-[#3f3f46]">
           <div className="relative h-40 bg-[#1d1d20] border-b border-[#27272a] overflow-hidden flex items-center justify-center">
             {thumbnail ? (
@@ -153,8 +150,8 @@ const CreateCourse: React.FC = () => {
           </div>
           <div className="p-5 flex-1 flex flex-col">
              <div className="text-[10px] uppercase font-bold tracking-wider text-primary-500 mb-2">{category || 'Category'}</div>
-             <h3 className="text-lg font-bold text-white leading-tight mb-2 line-clamp-2">{title || 'Untitled Project'}</h3>
-             <p className="text-xs text-primary-400 line-clamp-3">{description || 'Project description will appear here...'}</p>
+             <h3 className="text-lg font-bold text-white leading-tight mb-2 line-clamp-2">{title || 'Untitled Course'}</h3>
+             <p className="text-xs text-primary-400 line-clamp-3">{description || 'Course description will appear here...'}</p>
           </div>
         </div>
       </div>

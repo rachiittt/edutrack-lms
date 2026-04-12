@@ -1,126 +1,178 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Search, Filter, ChevronLeft, ChevronRight, Compass } from 'lucide-react';
 import { courseService } from '../services/courseService';
 import { Course, PaginationInfo } from '../types';
 import { useAuth } from '../context/AuthContext';
 import CourseCard from '../components/CourseCard';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { Search, Filter, ChevronLeft, ChevronRight, Compass } from 'lucide-react';
+
 const CourseList: React.FC = () => {
   const { enrollments } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [courses, setCourses] = useState<Course[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
+  const [search, setSearch] = useState(searchParams.get('search') ?? '');
+  const [category, setCategory] = useState(searchParams.get('category') ?? '');
   const [categories, setCategories] = useState<string[]>([]);
   const [page, setPage] = useState(1);
+
+  const activeSearch = searchParams.get('search') ?? '';
+  const activeCategory = searchParams.get('category') ?? '';
+
   useEffect(() => {
-    loadCategories();
-  }, []);
+    setSearch(activeSearch);
+    setCategory(activeCategory);
+  }, [activeCategory, activeSearch]);
+
   useEffect(() => {
-    loadCourses();
-  }, [page, category]);
-  const loadCategories = async () => {
+    setPage(1);
+  }, [activeCategory, activeSearch]);
+
+  const loadCategories = useCallback(async () => {
     try {
-      const response = await courseService.getCategories();
-      setCategories(response.data.categories);
+      const nextCategories = await courseService.getCategories();
+      setCategories(nextCategories);
     } catch (error) {
       console.error('Failed to load categories:', error);
     }
-  };
-  const loadCourses = async () => {
+  }, []);
+
+  const loadCourses = useCallback(async () => {
     setLoading(true);
+
     try {
-      const params: { page: number; limit: number; search?: string; category?: string } = { page, limit: 12 };
-      if (search) params.search = search;
-      if (category) params.category = category;
-      const response = await courseService.getAll(params);
-      setCourses(response.data.courses || []);
-      setPagination(response.data.pagination || null);
+      const response = await courseService.getAll({
+        page,
+        limit: 12,
+        search: activeSearch || undefined,
+        category: activeCategory || undefined,
+      });
+      setCourses(response.courses);
+      setPagination(response.pagination);
     } catch (error) {
       console.error('Failed to load courses:', error);
     } finally {
       setLoading(false);
     }
+  }, [activeCategory, activeSearch, page]);
+
+  useEffect(() => {
+    void loadCategories();
+  }, [loadCategories]);
+
+  useEffect(() => {
+    void loadCourses();
+  }, [loadCourses]);
+
+  const syncFilters = (nextSearch: string, nextCategory: string) => {
+    const nextParams = new URLSearchParams();
+
+    if (nextSearch) {
+      nextParams.set('search', nextSearch);
+    }
+
+    if (nextCategory) {
+      nextParams.set('category', nextCategory);
+    }
+
+    setSearchParams(nextParams);
   };
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+
+  const handleSearch = (event: React.FormEvent) => {
+    event.preventDefault();
     setPage(1);
-    loadCourses();
+    syncFilters(search.trim(), category);
   };
-  const enrolledCourseIds = enrollments.map((e) =>
-    typeof e.course === 'object' ? e.course._id : e.course
+
+  const handleCategoryChange = (nextCategory: string) => {
+    setCategory(nextCategory);
+    setPage(1);
+    syncFilters(search.trim(), nextCategory);
+  };
+
+  const enrolledCourseIds = enrollments.map((enrollment) =>
+    typeof enrollment.course === 'object' ? enrollment.course._id : enrollment.course
   );
+
   return (
     <div className="space-y-8 animate-fade-in pb-12">
-      {}
-      <div className="flex items-center gap-3 mb-2">
-        <Compass className="w-8 h-8 text-blue-500" />
-        <h1 className="text-4xl font-extrabold text-white tracking-tight">
-          Explore Projects
-        </h1>
+      <div className="space-y-3">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/10 text-blue-400">
+            <Compass className="h-6 w-6" />
+          </div>
+          <div>
+            <h1 className="text-4xl font-extrabold tracking-tight text-white">Course Catalog</h1>
+            <p className="text-primary-400">
+              Browse available courses, filter by category, and continue learning where you left off.
+            </p>
+          </div>
+        </div>
       </div>
-      <p className="text-primary-400 text-lg mb-8 max-w-2xl">
-        Discover highly curated learning paths and projects prepared by top experts in their respective fields.
-      </p>
-      {}
-      <div className="bg-[#111111] border border-[#27272a] p-2 rounded-xl flex flex-col md:flex-row gap-2 shadow-widget w-full md:w-3/4 lg:w-2/3">
-        <form onSubmit={handleSearch} className="flex-1 relative flex items-center">
-          <Search className="absolute left-4 w-5 h-5 text-primary-500" />
+
+      <div className="flex w-full flex-col gap-3 rounded-2xl border border-[#27272a] bg-[#111111] p-3 shadow-widget lg:flex-row lg:items-center">
+        <form onSubmit={handleSearch} className="relative flex-1">
+          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary-500" />
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search catalog..."
-            className="w-full bg-transparent border-none text-white pl-12 pr-4 py-3 placeholder:text-primary-600 focus:outline-none focus:ring-0 font-medium"
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search by title, topic, or keyword"
+            className="input-field pl-12"
           />
         </form>
-        <div className="w-px bg-[#27272a] mx-2 hidden md:block" />
-        <div className="relative flex items-center">
-          <Filter className="absolute left-4 w-4 h-4 text-primary-500" />
+
+        <div className="relative lg:w-64">
+          <Filter className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-primary-500" />
           <select
             value={category}
-            onChange={(e) => {
-              setCategory(e.target.value);
-              setPage(1);
-            }}
-            className="w-full md:w-48 bg-transparent border-none text-primary-300 pl-10 pr-8 py-3 appearance-none focus:outline-none focus:ring-0 text-sm font-medium"
+            onChange={(event) => handleCategoryChange(event.target.value)}
+            className="input-field appearance-none pl-11 text-sm"
           >
-            <option value="" className="bg-[#111111]">All Disciplines</option>
-            {categories.map((cat) => (
-              <option key={cat} value={cat} className="bg-[#111111]">
-                {cat}
+            <option value="">All categories</option>
+            {categories.map((item) => (
+              <option key={item} value={item}>
+                {item}
               </option>
             ))}
           </select>
         </div>
+
         <button
-          onClick={handleSearch}
-          className="bg-white text-black px-6 py-2 rounded-lg font-bold hover:bg-primary-200 transition-colors shrink-0"
+          type="button"
+          onClick={() => {
+            setPage(1);
+            syncFilters(search.trim(), category);
+          }}
+          className="btn-primary px-6"
         >
           Search
         </button>
       </div>
+
       {loading ? (
-        <div className="flex items-center justify-center h-[40vh]">
+        <div className="flex h-[40vh] items-center justify-center">
           <LoadingSpinner size="lg" />
         </div>
       ) : courses.length === 0 ? (
-        <div className="widget-panel p-16 text-center max-w-2xl mx-auto flex flex-col items-center">
-          <Search className="w-12 h-12 text-[#27272a] mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">No projects found</h3>
+        <div className="widget-panel mx-auto flex max-w-2xl flex-col items-center p-16 text-center">
+          <Search className="mb-4 h-12 w-12 text-[#27272a]" />
+          <h3 className="mb-2 text-xl font-bold text-white">No courses found</h3>
           <p className="text-primary-500">
-            We couldn't find anything matching your search criteria. Try removing some filters or searching for broader terms.
+            Try a broader keyword or remove one of the filters to see more results.
           </p>
         </div>
       ) : (
         <>
           {pagination && (
-            <p className="text-sm font-medium uppercase tracking-wider text-primary-500 mb-6">
-              Showing {courses.length} of {pagination.total} results
+            <p className="text-sm font-medium uppercase tracking-wider text-primary-500">
+              Showing {courses.length} of {pagination.total} courses
             </p>
           )}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {courses.map((course) => (
               <CourseCard
                 key={course._id}
@@ -129,35 +181,37 @@ const CourseList: React.FC = () => {
               />
             ))}
           </div>
-          {/* Default Dark Pagination */}
+
           {pagination && pagination.pages > 1 && (
             <div className="flex items-center justify-center gap-2 pt-12">
               <button
-                onClick={() => setPage(page - 1)}
+                onClick={() => setPage((current) => current - 1)}
                 disabled={page === 1}
                 className="btn-icon disabled:opacity-50"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="h-5 w-5" />
               </button>
-              {Array.from({ length: pagination.pages }, (_, i) => i + 1).map((p) => (
+
+              {Array.from({ length: pagination.pages }, (_, index) => index + 1).map((pageNumber) => (
                 <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className={`w-10 h-10 rounded-lg font-bold text-sm transition-all ${
-                    p === page
+                  key={pageNumber}
+                  onClick={() => setPage(pageNumber)}
+                  className={`h-10 w-10 rounded-lg text-sm font-bold transition-all ${
+                    pageNumber === page
                       ? 'bg-white text-black'
-                      : 'hover:bg-[#1d1d20] text-primary-400'
+                      : 'text-primary-400 hover:bg-[#1d1d20]'
                   }`}
                 >
-                  {p}
+                  {pageNumber}
                 </button>
               ))}
+
               <button
-                onClick={() => setPage(page + 1)}
+                onClick={() => setPage((current) => current + 1)}
                 disabled={page === pagination.pages}
                 className="btn-icon disabled:opacity-50"
               >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="h-5 w-5" />
               </button>
             </div>
           )}
@@ -166,4 +220,5 @@ const CourseList: React.FC = () => {
     </div>
   );
 };
+
 export default CourseList;

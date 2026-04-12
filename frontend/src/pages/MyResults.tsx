@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { quizService } from '../services/quizService';
@@ -11,19 +11,26 @@ const MyResults: React.FC = () => {
   const navigate = useNavigate();
   const [results, setResults] = useState<QuizResult[]>([]);
   const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    loadResults();
-  }, [user]);
-  const loadResults = async () => {
+
+  const loadResults = useCallback(async () => {
     try {
-      const response = await quizService.getMyResults();
-      setResults(response.data.results);
+      const nextResults = await quizService.getMyResults();
+      setResults(nextResults);
     } catch (error) {
       console.error('Failed to load results:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (user?.role === 'student') {
+      void loadResults();
+    } else {
+      setLoading(false);
+    }
+  }, [loadResults, user]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -45,14 +52,13 @@ const MyResults: React.FC = () => {
       <div className="flex items-center gap-3 mb-2">
         <Award className="w-8 h-8 text-yellow-500" />
         <h1 className="text-4xl font-extrabold text-white tracking-tight">
-          Achievements
+          My Results
         </h1>
       </div>
       <p className="text-primary-400 text-lg max-w-2xl">
-        Track your quiz performance and learning progress across all courses.
+        Review your quiz performance across every course.
       </p>
 
-      {/* Stats Row */}
       {totalQuizzes > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="widget-panel p-5">
@@ -134,4 +140,5 @@ const MyResults: React.FC = () => {
     </div>
   );
 };
+
 export default MyResults;

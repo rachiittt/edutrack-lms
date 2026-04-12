@@ -1,91 +1,106 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import {
-  LayoutDashboard,
-  BookOpen,
-  GraduationCap,
-  Award,
-  LogOut,
-  FolderPlus
-} from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { LogOut, GraduationCap } from 'lucide-react';
 import classNames from 'classnames';
+import { useAuth } from '../../context/AuthContext';
+import { getNavigationItems } from './navigation';
+
 const FloatingDock: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const navItems = getNavigationItems(user?.role);
+  const initials = user?.name
+    ?.split(' ')
+    .map((part) => part.charAt(0))
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
-  const isTeacher = user?.role === 'teacher' || user?.role === 'admin';
 
-  const navItems = isTeacher
-    ? [
-        { name: 'Workspace', path: '/dashboard', icon: LayoutDashboard },
-        { name: 'Browse', path: '/courses', icon: BookOpen },
-        { name: 'My Projects', path: '/my-courses', icon: FolderPlus },
-        { name: 'Studio', path: '/create-course', icon: FolderPlus },
-      ]
-    : [
-        { name: 'Workspace', path: '/dashboard', icon: LayoutDashboard },
-        { name: 'Browse', path: '/courses', icon: BookOpen },
-        { name: 'My Learning', path: '/my-courses', icon: GraduationCap },
-        { name: 'Achievements', path: '/my-results', icon: Award },
-      ];
   return (
-    <aside className="fixed left-0 top-0 bottom-0 z-40 flex flex-col items-center py-6 px-3 bg-[#09090b] border-r border-[#27272a] w-[72px] transition-all duration-300 group hover:w-[240px] overflow-hidden">
-      {}
-      <div className="flex items-center justify-start w-full px-2 mb-10 h-10 overflow-hidden shrink-0">
-        <div className="w-8 h-8 rounded bg-white text-black flex items-center justify-center font-bold text-xl shrink-0">
-          E
+    <>
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-[#27272a] bg-[#09090b] md:flex">
+        <div className="border-b border-[#27272a] px-6 py-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-base font-bold text-black">
+              E
+            </div>
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary-500">
+                EduTrack
+              </p>
+              <p className="text-lg font-semibold text-white">Learning Portal</p>
+            </div>
+          </div>
+          <div className="mt-6 flex items-center gap-3 rounded-2xl border border-[#27272a] bg-[#111111] px-4 py-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/15 text-sm font-semibold text-blue-300">
+              {initials || <GraduationCap className="h-5 w-5" />}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-white">{user?.name}</p>
+              <p className="truncate text-xs text-primary-500">{user?.email}</p>
+            </div>
+          </div>
         </div>
-        <span className="ml-4 font-semibold text-white tracking-tight whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          EduTrack
-        </span>
-      </div>
-      {}
-      <nav className="flex-1 w-full space-y-2">
+
+        <nav className="flex-1 space-y-1 px-4 py-6">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.label}
+              to={item.path}
+              className={({ isActive }) =>
+                classNames(
+                  'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors',
+                  {
+                    'bg-white text-black': isActive,
+                    'text-primary-300 hover:bg-[#1d1d20] hover:text-white': !isActive,
+                  }
+                )
+              }
+            >
+              <item.icon className="h-5 w-5 shrink-0" />
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="border-t border-[#27272a] p-4">
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-primary-300 transition-colors hover:bg-red-500/10 hover:text-red-400"
+          >
+            <LogOut className="h-5 w-5" />
+            <span>Sign out</span>
+          </button>
+        </div>
+      </aside>
+
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[#27272a] bg-[#09090b]/95 px-2 py-2 backdrop-blur md:hidden">
         {navItems.map((item) => (
           <NavLink
-            key={item.name}
+            key={item.label}
             to={item.path}
             className={({ isActive }) =>
               classNames(
-                'flex items-center w-full p-2.5 rounded-lg transition-all duration-200 group/item relative',
+                'flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-medium transition-colors',
                 {
-                  'bg-[#27272a] text-white': isActive,
+                  'bg-white text-black': isActive,
                   'text-primary-400 hover:bg-[#1d1d20] hover:text-white': !isActive,
                 }
               )
             }
           >
-            <item.icon className="w-5 h-5 shrink-0" />
-            <span className="ml-4 text-sm font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              {item.name}
-            </span>
-            {}
-            <div className="absolute left-14 bg-white text-black px-2 py-1 rounded text-xs font-semibold whitespace-nowrap opacity-0 pointer-events-none group-hover/item:opacity-100 group-hover:hidden transition-opacity z-50">
-              {item.name}
-            </div>
+            <item.icon className="h-4 w-4" />
+            <span>{item.label}</span>
           </NavLink>
         ))}
       </nav>
-      {}
-      <div className="w-full pt-4 border-t border-[#27272a]">
-        <button
-          onClick={handleLogout}
-          className="flex items-center w-full p-2.5 rounded-lg transition-all duration-200 text-primary-400 hover:bg-red-500/10 hover:text-red-500 group/item relative"
-        >
-          <LogOut className="w-5 h-5 shrink-0" />
-          <span className="ml-4 text-sm font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            Sign out
-          </span>
-          <div className="absolute left-14 bg-white text-black px-2 py-1 rounded text-xs font-semibold whitespace-nowrap opacity-0 pointer-events-none group-hover/item:opacity-100 group-hover:hidden transition-opacity z-50">
-            Sign out
-          </div>
-        </button>
-      </div>
-    </aside>
+    </>
   );
 };
+
 export default FloatingDock;

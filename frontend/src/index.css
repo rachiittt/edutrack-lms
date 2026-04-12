@@ -16,10 +16,12 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Force dark mode for the premium look bys */
-    @apply bg-primary-950 text-primary-200 antialiased selection:bg-primary-700 selection:text-white;
+    background:
+      radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 30%),
+      radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent 26%),
+      linear-gradient(180deg, #0f172a 0%, #09090b 45%, #09090b 100%);
+    @apply text-primary-200 antialiased selection:bg-primary-700 selection:text-white;
   }
-
 
   ::-webkit-scrollbar {
     width: 4px;
@@ -40,15 +42,13 @@
 }
 
 @layer components {
-
   .workspace-layout {
-    @apply flex h-screen w-full overflow-hidden bg-primary-950;
+    @apply flex min-h-screen w-full bg-primary-950;
   }
 
   .main-content {
-    @apply flex-1 flex flex-col h-full bg-primary-950 relative overflow-hidden;
+    @apply relative flex h-full flex-1 flex-col overflow-hidden bg-primary-950;
   }
-
 
   .title-lg {
     @apply text-3xl font-bold tracking-tight text-white mb-2;
@@ -62,73 +62,63 @@
     @apply text-sm text-primary-400;
   }
 
-  /* Gradient text utility */
   .gradient-text {
     @apply text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500;
   }
 
-
   .widget-panel {
-    @apply bg-[#111111] border border-[#27272a] rounded-xl overflow-hidden transition-all duration-200 hover:border-[#3f3f46];
+    @apply overflow-hidden rounded-2xl border border-[#27272a] bg-[#111111]/95 shadow-widget transition-all duration-200 hover:border-[#3f3f46];
   }
 
   .card {
-    @apply bg-[#111111] border border-[#27272a] rounded-xl overflow-hidden;
+    @apply overflow-hidden rounded-2xl border border-[#27272a] bg-[#111111];
   }
 
   .btn-primary {
-    @apply inline-flex items-center justify-center px-4 py-2 bg-white text-black font-semibold rounded-lg transition-all duration-200 hover:bg-primary-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center rounded-xl bg-white px-4 py-2 font-semibold text-black transition-all duration-200 hover:bg-primary-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center px-4 py-2 bg-[#111111] border border-[#27272a] text-primary-200 font-semibold rounded-lg transition-all duration-200 hover:bg-[#1d1d20] hover:text-white active:scale-[0.98];
+    @apply inline-flex items-center justify-center rounded-xl border border-[#27272a] bg-[#111111] px-4 py-2 font-semibold text-primary-200 transition-all duration-200 hover:bg-[#1d1d20] hover:text-white active:scale-[0.98];
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center px-3 py-2 text-primary-400 font-medium rounded-lg transition-all duration-200 hover:bg-[#1d1d20] hover:text-white;
+    @apply inline-flex items-center justify-center rounded-xl px-3 py-2 font-medium text-primary-400 transition-all duration-200 hover:bg-[#1d1d20] hover:text-white;
   }
 
   .btn-icon {
-    @apply p-2 rounded-md text-primary-400 hover:text-white hover:bg-[#1d1d20] transition-colors;
+    @apply rounded-lg p-2 text-primary-400 transition-colors hover:bg-[#1d1d20] hover:text-white;
   }
 
   .input-field {
-    @apply w-full px-4 py-3 bg-[#09090b] border border-[#27272a] rounded-lg text-white placeholder:text-primary-500 focus:outline-none focus:ring-1 focus:ring-white focus:border-white transition-all duration-200;
+    @apply w-full rounded-xl border border-[#27272a] bg-[#09090b] px-4 py-3 text-white placeholder:text-primary-500 transition-all duration-200 focus:border-white focus:outline-none focus:ring-1 focus:ring-white;
   }
 
-  /* Page container for full-screen pages */
   .page-container {
     @apply bg-primary-950 text-primary-200;
   }
-
 
   .bg-grid {
     background-size: 32px 32px;
     background-image: linear-gradient(to right, #27272a 1px, transparent 1px), linear-gradient(to bottom, #27272a 1px, transparent 1px);
   }
 
-  /* Shadow utilities for command palette */
   .shadow-palette {
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 16px 48px rgba(0, 0, 0, 0.4);
   }
 }
 
 @layer utilities {
-
-  /* Pulse slow animation for login/register floating elements */
   .animate-pulse-slow {
     animation: pulseSlow 4s ease-in-out infinite;
   }
 
-  /* Slide up animation */
   .animate-slide-up {
     animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
 
-/* Keyframes for custom animations */
 @keyframes pulseSlow {
-
   0%,
   100% {
     opacity: 1;

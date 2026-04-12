@@ -1,28 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { quizService } from '../services/quizService';
 import { QuizResult } from '../types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { ArrowLeft, Trophy, Users } from 'lucide-react';
+
 const QuizResults: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [results, setResults] = useState<QuizResult[]>([]);
   const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    loadResults();
-  }, [id]);
-  const loadResults = async () => {
-    if (!id) return;
+
+  const loadResults = useCallback(async () => {
+    if (!id) {
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await quizService.getResults(id);
-      setResults(response.data.results);
+      const nextResults = await quizService.getResults(id);
+      setResults(nextResults);
     } catch (error) {
       console.error('Failed to load results:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    void loadResults();
+  }, [loadResults]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
@@ -31,7 +39,6 @@ const QuizResults: React.FC = () => {
     );
   }
 
-  // Calculate stats
   const avgScore = results.length > 0
     ? Math.round(results.reduce((sum, r) => sum + (r.score / r.totalQuestions) * 100, 0) / results.length)
     : 0;
@@ -52,7 +59,6 @@ const QuizResults: React.FC = () => {
         </div>
       </div>
 
-      {/* Stats */}
       {results.length > 0 && (
         <div className="grid grid-cols-2 gap-4">
           <div className="widget-panel p-5">
@@ -123,4 +129,5 @@ const QuizResults: React.FC = () => {
     </div>
   );
 };
+
 export default QuizResults;

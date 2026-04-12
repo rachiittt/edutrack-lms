@@ -1,24 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { Sun, Moon } from 'lucide-react';
+
+const getInitialTheme = () => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  const stored = localStorage.getItem('edutrack_theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  return stored === 'dark' || (!stored && prefersDark);
+};
+
 const ThemeToggle: React.FC = () => {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(getInitialTheme);
+
   useEffect(() => {
-    const stored = localStorage.getItem('edutrack_theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const shouldBeDark = stored === 'dark' || (!stored && prefersDark);
-    setIsDark(shouldBeDark);
-    document.documentElement.classList.toggle('dark', shouldBeDark);
-  }, []);
+    document.documentElement.classList.toggle('dark', isDark);
+    localStorage.setItem('edutrack_theme', isDark ? 'dark' : 'light');
+  }, [isDark]);
+
   const toggle = () => {
-    const newDark = !isDark;
-    setIsDark(newDark);
-    document.documentElement.classList.toggle('dark', newDark);
-    localStorage.setItem('edutrack_theme', newDark ? 'dark' : 'light');
+    setIsDark((current) => !current);
   };
+
   return (
     <button
       onClick={toggle}
-      className="relative p-2 rounded-xl bg-surface-100 dark:bg-surface-700 hover:bg-surface-200 dark:hover:bg-surface-600 transition-all duration-300 group"
+      className="group relative rounded-xl border border-[#27272a] bg-[#111111] p-2 transition-all duration-300 hover:bg-[#1d1d20]"
       aria-label="Toggle theme"
     >
       <div className="relative w-5 h-5">
@@ -36,4 +44,5 @@ const ThemeToggle: React.FC = () => {
     </button>
   );
 };
+
 export default ThemeToggle;
