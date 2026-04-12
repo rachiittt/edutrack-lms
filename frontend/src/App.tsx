@@ -35,10 +35,9 @@ const App: React.FC = () => {
           }}
         />
         <Routes>
-          {}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          {}
+
           <Route
             element={
               <ProtectedRoute>
@@ -62,7 +61,7 @@ const App: React.FC = () => {
             <Route path="/quiz/:id" element={<QuizPage />} />
             <Route path="/quiz/:id/results" element={<QuizResults />} />
           </Route>
-          {}
+
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
