@@ -22,9 +22,9 @@ export class ResultRepository extends BaseRepository<IResult> implements IResult
   }
   async findByQuiz(quizId: string): Promise<IResult[]> {
     return this.model
-      .findOne({ quiz: quizId })
+      .find({ quiz: quizId })
       .populate('quiz', 'title questions')
-      .exec() as any;
+      .exec() as unknown as Promise<IResult[]>;
   }
   async findByStudent(studentId: string): Promise<IResult[]> {
     return this.model

@@ -39,7 +39,7 @@ export class MaterialService {
       ...data,
       course: courseId,
       order,
-    } as any);
+    } as unknown as Partial<IMaterial>);
     this.logger.info(`Material added to course ${courseId}: ${data.title}`);
     await eventBus.publish(AppEvents.MATERIAL_ADDED, {
       courseId,

@@ -49,7 +49,7 @@ export class QuizService implements IQuizService {
     const quiz = await this.quizRepository.create({
       ...data,
       course: courseId,
-    } as any);
+    } as unknown as Partial<IQuiz>);
     this.logger.info(`Quiz created: ${data.title} for course ${courseId}`);
     await eventBus.publish(AppEvents.QUIZ_CREATED, {
       quizId: quiz._id,
@@ -110,7 +110,7 @@ export class QuizService implements IQuizService {
       answers,
       score: evaluation.score,
       totalQuestions: evaluation.totalQuestions,
-    } as any);
+    } as unknown as Partial<IResult>);
     await eventBus.publish(AppEvents.QUIZ_ATTEMPTED, {
       studentId,
       quizId,

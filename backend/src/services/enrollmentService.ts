@@ -32,7 +32,7 @@ export class EnrollmentService implements IEnrollmentService {
     const enrollment = await this.enrollmentRepository.create({
       student: studentId,
       course: courseId,
-    } as any);
+    } as unknown as Partial<IEnrollment>);
     await this.courseRepository.incrementEnrollmentCount(courseId);
     this.logger.info(`Student ${studentId} enrolled in course ${courseId}`);
     await eventBus.publish(AppEvents.STUDENT_ENROLLED, {
