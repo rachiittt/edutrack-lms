@@ -7,9 +7,11 @@ interface CourseCardProps {
   course: Course;
   isEnrolled?: boolean;
 }
-
+// Course Card Component - displays course overview
 const CourseCard: React.FC<CourseCardProps> = ({ course, isEnrolled }) => {
   const navigate = useNavigate();
+  console.log("CourseCard rendered:", course._id); // 👈 added line
+
 
   return (
     <div
@@ -77,5 +79,4 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, isEnrolled }) => {
     </div>
   );
 };
-
 export default CourseCard;

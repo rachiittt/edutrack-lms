@@ -138,8 +138,8 @@ npm run seed
 
 ## 👨‍💻 Created By
 
-- Satyam Kumar  
-- Kavya Saraswat  
-- Mausam Kumar Dwivedi
-- Rachit Singh  
-- Himank Kaushik  
+- Satyam Kumar.
+- Kavya Saraswat.
+- Mausam Kumar Dwivedi.
+- Rachit Singh.
+- Himank Kaushik.
