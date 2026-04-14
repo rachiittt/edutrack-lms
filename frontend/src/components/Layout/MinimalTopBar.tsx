@@ -76,7 +76,7 @@ const MinimalTopBar: React.FC = () => {
             </div>
           </div>
 
-          <button onClick={handleLogout} className="btn-secondary gap-2 px-3 py-2">
+          <button onClick={handleLogout} className="btn-secondary gap-2 px-3 py-2" title="Sign out of your account">
             <LogOut className="h-4 w-4" />
             <span className="hidden sm:inline">Sign out</span>
           </button>
