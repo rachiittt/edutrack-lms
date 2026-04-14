@@ -14,7 +14,7 @@ const NotFound: React.FC = () => {
           Page Not Found
         </h2>
         <p className="text-primary-400 mb-8 max-w-md mx-auto">
-          The page you're looking for doesn't exist or has been moved.
+          Oops! The page you're looking for doesn't exist or has been moved.
         </p>
         <div className="flex items-center justify-center gap-3">
           <button onClick={() => navigate(-1)} className="btn-secondary gap-2">
