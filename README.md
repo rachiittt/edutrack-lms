@@ -113,29 +113,29 @@ npm run seed
 
 - Link - https://excalidraw.com/#json=aUNErciWaETx_aOou_Ead,uBZ_KB_Qcm8CD9oNOPsUOQ
 
-- EduTrack LMS — High-Level System Architecture
-  
-  <img width="804" height="503" alt="Screenshot 2026-04-09 at 11 17 57 PM" src="https://github.com/user-attachments/assets/5f762091-ecca-49f7-9779-8e0cc920a749" />
+1. EduTrack LMS — High-Level System Architecture
 
-- EduTrack LMS system
-  
-  <img width="651" height="533" alt="Screenshot 2026-04-09 at 11 22 18 PM" src="https://github.com/user-attachments/assets/c194a29d-10ad-40f0-8be5-00d46d78802c" />
+<img width="813" height="693" alt="Screenshot 2026-04-15 at 8 54 14 PM" src="https://github.com/user-attachments/assets/5af94d79-a2c5-4c56-acb2-a18ef68d6060" />
 
-- Use Case
-  
-  <img width="1410" height="1302" alt="image" src="https://github.com/user-attachments/assets/e49906b9-e805-43da-b04e-383002e67655" />
 
-- Class Diagram
+2. EduTrack LMS system
   
-  <img width="747" height="677" alt="Screenshot 2026-04-09 at 11 24 27 PM" src="https://github.com/user-attachments/assets/aed47be5-48e4-42d8-8002-feaf5f269001" />
+<img width="1253" height="198" alt="Screenshot 2026-04-15 at 8 55 19 PM" src="https://github.com/user-attachments/assets/1d2f8c7e-1e9f-4c14-a219-ec8f6737f8a5" />
 
-- ERD
-  
-  <img width="671" height="566" alt="Screenshot 2026-04-09 at 11 25 09 PM" src="https://github.com/user-attachments/assets/df4df06c-3fca-47c2-bdee-fbe6a0bb90b9" />
 
-- EduTrack LMS — Sequence Diagram
+3. Use Case
   
-  <img width="616" height="616" alt="Screenshot 2026-04-09 at 11 27 04 PM" src="https://github.com/user-attachments/assets/23ffbff0-f2a1-416a-9826-9d1895638c14" />
+<img width="748" height="687" alt="Screenshot 2026-04-15 at 8 55 52 PM" src="https://github.com/user-attachments/assets/0f417dbc-2a5f-413b-a8a9-ddef29f19792" />
+
+4. Class Diagram
+  
+<img width="801" height="684" alt="Screenshot 2026-04-15 at 8 56 55 PM" src="https://github.com/user-attachments/assets/cebaca9d-994d-47d5-9828-b2ec5d534efa" />
+
+
+5. EduTrack LMS — Sequence Diagram
+  
+<img width="564" height="729" alt="Screenshot 2026-04-15 at 8 58 39 PM" src="https://github.com/user-attachments/assets/1914912c-91ba-434a-a9fb-51cf7b32b118" />
+
 
 
 ## 👨‍💻 Created By
