@@ -35,7 +35,7 @@ export class CourseService {
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
       Course.find(filter)
-        .populate('teacher', 'name email avatar')
+        .populate('teacher', 'name email avatar bio')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -56,7 +56,7 @@ export class CourseService {
 
   async getById(id: string): Promise<ICourse> {
     const course = await Course.findById(id)
-      .populate('teacher', 'name email avatar')
+      .populate('teacher', 'name email avatar bio')
       .populate('collaborators', 'name email avatar')
       .exec();
     
