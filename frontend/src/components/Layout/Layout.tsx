@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import FloatingDock from './FloatingDock';
 import MinimalTopBar from './MinimalTopBar';
+import Footer from './Footer';
 
 const Layout: React.FC = () => {
   const location = useLocation();
@@ -20,13 +21,14 @@ const Layout: React.FC = () => {
   return (
     <div className="workspace-layout">
       <FloatingDock />
-      <div className="relative flex min-h-screen flex-1 flex-col bg-primary-950 md:pl-72">
+      <div className="relative flex h-screen flex-1 flex-col bg-primary-950 md:pl-72 overflow-y-auto overflow-x-hidden">
         <MinimalTopBar />
-        <main className="flex-1 overflow-y-auto px-4 py-6 pb-24 scroll-smooth md:px-8 md:pb-8">
-          <div className="mx-auto w-full max-w-7xl animate-fade-in">
+        <main className="flex-1 px-4 py-6 pb-12 md:px-8 shrink-0">
+          <div className="mx-auto w-full max-w-7xl animate-fade-in min-h-[calc(100vh-200px)]">
             <Outlet />
           </div>
         </main>
+        <Footer />
       </div>
     </div>
   );

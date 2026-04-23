@@ -1,20 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate, Link } from 'react-router-dom';
-import { LogOut, GraduationCap } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import classNames from 'classnames';
 import { useAuth } from '../../context/AuthContext';
+import { resolveApiUrl } from '../../utils/urlResolver';
 import { getNavigationItems } from './navigation';
+import AboutModal from './AboutModal';
 
 const FloatingDock: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const navItems = getNavigationItems(user?.role);
-  const initials = user?.name
-    ?.split(' ')
-    .map((part) => part.charAt(0))
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
 
   const handleLogout = () => {
     logout();
@@ -25,38 +22,32 @@ const FloatingDock: React.FC = () => {
     <>
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 flex-col border-r border-[#27272a] bg-[#09090b] md:flex">
         <div className="border-b border-[#27272a] px-6 py-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-base font-bold text-black">
-              E
+          <button 
+            onClick={() => setIsAboutOpen(true)}
+            className="flex items-center gap-3 text-left hover:opacity-80 transition-opacity w-full"
+          >
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#111111] overflow-hidden shadow-lg border border-[#27272a]">
+              <img src="/app-favicon.png" alt="EduTrack Logo" className="h-full w-full object-cover" onError={(e) => { e.currentTarget.src = '/favicon.ico' }} />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary-500">
                 EduTrack
               </p>
-              <p className="text-lg font-semibold text-white">Learning Portal</p>
+              <p className="truncate text-lg font-semibold text-white">Learning Portal</p>
             </div>
-          </div>
-          <Link to="/profile" className="mt-6 flex items-center gap-3 rounded-2xl border border-[#27272a] bg-[#111111] px-4 py-3 transition-colors hover:bg-[#1d1d20]">
-            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-[#27272a] bg-[#1d1d20] text-sm font-semibold text-blue-300">
-              {user?.avatar && !user.avatar.includes('api.dicebear.com') ? (
-                <img
-                  src={
-                    user.avatar.startsWith('/uploads/')
-                      ? `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5001'}${user.avatar}`
-                      : user.avatar
-                  }
-                  alt={user.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center bg-blue-500/15">
-                  {initials || <GraduationCap className="h-5 w-5" />}
-                </div>
-              )}
+          </button>
+          <Link to="/profile" className="group mt-6 flex items-center gap-3 rounded-2xl border border-[#27272a] bg-[#09090b] p-4 transition-all hover:bg-[#111111] hover:border-primary-500/30 shadow-md relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-primary-500/5 blur-[20px] rounded-full -mr-10 -mt-10" />
+            <div className="relative z-10 h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-[#1d1d20] shadow-sm group-hover:border-primary-500/40 transition-all">
+              <img
+                src={resolveApiUrl(user?.avatar) || `https://api.dicebear.com/9.x/miniavs/svg?seed=${encodeURIComponent(user?.name || 'user')}`}
+                alt={user?.name}
+                className="h-full w-full object-cover transition-transform group-hover:scale-105"
+              />
             </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-white">{user?.name}</p>
-              <p className="truncate text-xs text-primary-500">{user?.email}</p>
+            <div className="min-w-0 flex-1 relative z-10">
+              <p className="truncate text-sm font-bold text-white tracking-tight">{user?.name}</p>
+              <p className="truncate text-[10px] font-semibold uppercase tracking-wider text-primary-500">{user?.role}</p>
             </div>
           </Link>
         </div>
@@ -82,7 +73,7 @@ const FloatingDock: React.FC = () => {
           ))}
         </nav>
 
-        <div className="border-t border-[#27272a] p-4">
+        <div className="border-t border-[#27272a] p-4 mt-auto">
           <button
             onClick={handleLogout}
             className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-primary-300 transition-colors hover:bg-red-500/10 hover:text-red-400"
@@ -113,6 +104,8 @@ const FloatingDock: React.FC = () => {
           </NavLink>
         ))}
       </nav>
+
+      <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
     </>
   );
 };

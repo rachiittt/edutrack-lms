@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, BookOpen, ClipboardList, Check, CheckCheck } from 'lucide-react';
+import { Bell, BookOpen, ClipboardList, CheckCheck } from 'lucide-react';
 import { notificationService, Notification } from '../services/notificationService';
 import { formatDate } from '../utils/formatters';
 
@@ -22,6 +22,7 @@ const NotificationBell: React.FC = () => {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void loadNotifications();
     const interval = setInterval(loadNotifications, 30000); // Poll every 30s
     return () => clearInterval(interval);
@@ -82,7 +83,7 @@ const NotificationBell: React.FC = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative rounded-xl border border-[#27272a] bg-[#111111] p-2.5 text-primary-400 transition-colors hover:bg-[#1d1d20] hover:text-white"
+        className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-[#27272a] bg-[#111111] text-primary-400 transition-colors hover:bg-[#1d1d20] hover:text-white shadow-xl shadow-black/30"
         aria-label="Notifications"
       >
         <Bell className="h-4 w-4" />
