@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
+import { resolveApiUrl } from '../utils/urlResolver';
 import toast from 'react-hot-toast';
 import {
   Camera, Edit3, Mail, Save, Shield, User as UserIcon, Calendar,
   Globe, Activity, TrendingUp, BookOpen, Trophy, Code2, Briefcase, MessageCircle,
-  Hash, Zap, Award
+  Hash, Zap
 } from 'lucide-react';
 import classNames from 'classnames';
 
@@ -17,7 +18,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import { formatDate } from '../utils/formatters';
 import { getApiError } from '../utils/apiErrorHandler';
 
-const AVATAR_API = 'https://api.dicebear.com/9.x/initials/svg?seed=';
+const AVATAR_API = 'https://api.dicebear.com/9.x/miniavs/svg?seed=';
 
 type Tab = 'details' | 'stats';
 
@@ -79,7 +80,9 @@ const Profile: React.FC = () => {
               try {
                 const results = await quizService.getMyResults();
                 setQuizResults(results);
-              } catch {}
+              } catch (e) {
+                console.error(e);
+              }
             }
           }
         }
@@ -95,13 +98,9 @@ const Profile: React.FC = () => {
   const getAvatarUrl = (user: User | null) => {
     if (!user) return '';
     if (user.avatar) {
-      if (user.avatar.startsWith('/uploads/')) {
-        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5001';
-        return `${apiBase.replace('/api', '')}${user.avatar}`;
-      }
-      return user.avatar;
+      return resolveApiUrl(user.avatar);
     }
-    return `${AVATAR_API}${encodeURIComponent(user.name)}`;
+    return `${AVATAR_API}${encodeURIComponent(user.username || user.name)}`;
   };
 
   const handleSaveProfile = async () => {
@@ -162,9 +161,11 @@ const Profile: React.FC = () => {
   return (
     <div className="mx-auto max-w-5xl space-y-6 animate-fade-in pb-10 px-4">
       <div className="flex flex-col gap-1">
-        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary-500">Profile Dashboard</p>
+        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary-500">
+          {profileUser.role === 'teacher' || profileUser.role === 'admin' ? 'Educator Profile' : 'Student Profile'}
+        </p>
         <h1 className="text-3xl font-bold tracking-tight text-white">
-          {isOwnProfile ? 'Your Identity' : profileUser.name}
+          {profileUser.name}
         </h1>
       </div>
 
@@ -213,11 +214,11 @@ const Profile: React.FC = () => {
                 {profileUser.bio || "No biography provided."}
               </p>
 
-              <div className="grid grid-cols-4 gap-2.5 w-full pt-5 border-t border-[#27272a]">
-                <SocialLink href={profileUser.socialLinks?.github} icon={<Code2 />} label="GitHub" brand="github" />
-                <SocialLink href={profileUser.socialLinks?.linkedin} icon={<Briefcase />} label="LinkedIn" brand="linkedin" />
-                <SocialLink href={profileUser.socialLinks?.twitter} icon={<MessageCircle />} label="Twitter" brand="twitter" />
-                <SocialLink href={profileUser.socialLinks?.website} icon={<Globe />} label="Website" brand="web" />
+              <div className="flex flex-wrap justify-center gap-3 w-full pt-5 border-t border-[#27272a]">
+                <SocialLink href={profileUser.socialLinks?.github} icon={<Code2 className="h-4 w-4" />} label="GitHub" brand="github" />
+                <SocialLink href={profileUser.socialLinks?.linkedin} icon={<Briefcase className="h-4 w-4" />} label="LinkedIn" brand="linkedin" />
+                <SocialLink href={profileUser.socialLinks?.twitter} icon={<MessageCircle className="h-4 w-4" />} label="Twitter" brand="twitter" />
+                <SocialLink href={profileUser.socialLinks?.website} icon={<Globe className="h-4 w-4" />} label="Website" brand="web" />
               </div>
             </div>
           </div>
@@ -238,7 +239,7 @@ const Profile: React.FC = () => {
                 "text-primary-500 hover:text-primary-300": activeTab !== 'details'
               })}
             >
-              <UserIcon className="w-3.5 h-3.5" /> Metadata
+              <UserIcon className="w-3.5 h-3.5" /> Overview
             </button>
             <button
               onClick={() => setActiveTab('stats')}
@@ -254,43 +255,42 @@ const Profile: React.FC = () => {
           <div className="animate-fade-in">
             {activeTab === 'details' && (
               <div className="widget-panel p-8 space-y-8">
-                <div className="flex items-center justify-between border-b border-[#27272a] pb-6">
-                  <div>
-                    <h3 className="text-lg font-bold text-white">Public Settings</h3>
-                    <p className="text-xs text-primary-500 mt-1">Configure your visible identity profile.</p>
+                {isOwnProfile && (
+                  <div className="flex items-center justify-between border-b border-[#27272a] pb-6">
+                    <div>
+                      <h3 className="text-lg font-bold text-white">{isEditing ? 'Configure Profile' : 'Profile Settings'}</h3>
+                      <p className="text-xs text-primary-500 mt-1">Manage your public identity and social presence.</p>
+                    </div>
+                    {!isEditing && (
+                      <button onClick={() => setIsEditing(true)} className="btn-secondary h-9 px-4 text-xs gap-2">
+                        <Edit3 className="w-3.5 h-3.5 text-primary-500" /> Edit Profile
+                      </button>
+                    )}
                   </div>
-                  {isOwnProfile && !isEditing && (
-                    <button onClick={() => setIsEditing(true)} className="btn-secondary h-9 px-4 text-xs gap-2">
-                      <Edit3 className="w-3.5 h-3.5 text-primary-500" /> Edit Profile
-                    </button>
-                  )}
-                </div>
+                )}
 
                 <div className="space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Field label="Legal Name" icon={<Hash />}>
-                      {isEditing ? (
+                    {isEditing ? (
+                      <Field label="Legal Name" icon={<Hash />}>
                         <input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} className="input-field h-11 text-sm" />
-                      ) : (
-                        <p className="text-sm text-white font-semibold py-2 border-b border-white/5">{profileUser.name}</p>
-                      )}
-                    </Field>
-                    <Field label="Avatar URL" icon={<Zap />}>
-                      {isEditing ? (
+                      </Field>
+                    ) : null}
+                    {isEditing ? (
+                      <Field label="Avatar URL" icon={<Zap />}>
                         <input value={editForm.avatar} onChange={(e) => setEditForm({ ...editForm, avatar: e.target.value })} className="input-field h-11 text-sm" />
-                      ) : (
-                        <p className="text-xs text-primary-400 font-medium py-2 border-b border-white/5">{profileUser.avatar ? 'Custom image active' : 'Default initials'}</p>
-                      )}
-                    </Field>
+                      </Field>
+                    ) : null}
                   </div>
 
-                  <Field label="Professional Bio" icon={<Edit3 />}>
+                  <Field label="Professional Biography" icon={<Edit3 />}>
                     {isEditing ? (
-                      <textarea value={editForm.bio} onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })} className="input-field min-h-[120px] resize-none pt-3 text-sm" />
+                      <textarea value={editForm.bio} onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })} className="input-field min-h-[140px] resize-none pt-3 text-sm" />
                     ) : (
-                      <div className="bg-[#111111] rounded-2xl p-5 border border-[#27272a]">
+                      <div className="bg-[#09090b]/50 rounded-2xl p-6 border border-[#27272a] shadow-inner relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-primary-500/20 group-hover:bg-primary-500/40 transition-colors" />
                         <p className="text-sm text-primary-300 leading-relaxed whitespace-pre-wrap font-medium">
-                          {profileUser.bio || 'Biography content not yet established.'}
+                          {profileUser.bio || 'This user has not established a professional biography yet.'}
                         </p>
                       </div>
                     )}
@@ -298,15 +298,26 @@ const Profile: React.FC = () => {
                   
                   <div className="pt-4 space-y-6">
                     <div className="flex items-center gap-4">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-primary-600">Social Connections</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-primary-600">Connected Platforms</span>
                       <div className="h-px flex-1 bg-[#27272a]" />
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                      <SocialField label="GitHub" icon={<Code2 className="text-emerald-500/70" />} isEditing={isEditing} value={editForm.github} onChange={(v) => setEditForm({...editForm, github: v})} displayValue={profileUser.socialLinks?.github} />
-                      <SocialField label="LinkedIn" icon={<Briefcase className="text-blue-500/70" />} isEditing={isEditing} value={editForm.linkedin} onChange={(v) => setEditForm({...editForm, linkedin: v})} displayValue={profileUser.socialLinks?.linkedin} />
-                      <SocialField label="Twitter" icon={<MessageCircle className="text-sky-500/70" />} isEditing={isEditing} value={editForm.twitter} onChange={(v) => setEditForm({...editForm, twitter: v})} displayValue={profileUser.socialLinks?.twitter} />
-                      <SocialField label="Website" icon={<Globe className="text-purple-500/70" />} isEditing={isEditing} value={editForm.website} onChange={(v) => setEditForm({...editForm, website: v})} displayValue={profileUser.socialLinks?.website} />
+                      {(isEditing || profileUser.socialLinks?.github) && (
+                        <SocialField label="GitHub" icon={<Code2 className="h-4 w-4" />} isEditing={isEditing} value={editForm.github} onChange={(v) => setEditForm({...editForm, github: v})} displayValue={profileUser.socialLinks?.github} />
+                      )}
+                      {(isEditing || profileUser.socialLinks?.linkedin) && (
+                        <SocialField label="LinkedIn" icon={<Briefcase className="h-4 w-4" />} isEditing={isEditing} value={editForm.linkedin} onChange={(v) => setEditForm({...editForm, linkedin: v})} displayValue={profileUser.socialLinks?.linkedin} />
+                      )}
+                      {(isEditing || profileUser.socialLinks?.twitter) && (
+                        <SocialField label="Twitter" icon={<MessageCircle className="h-4 w-4" />} isEditing={isEditing} value={editForm.twitter} onChange={(v) => setEditForm({...editForm, twitter: v})} displayValue={profileUser.socialLinks?.twitter} />
+                      )}
+                      {(isEditing || profileUser.socialLinks?.website) && (
+                        <SocialField label="Website" icon={<Globe className="h-4 w-4" />} isEditing={isEditing} value={editForm.website} onChange={(v) => setEditForm({...editForm, website: v})} displayValue={profileUser.socialLinks?.website} />
+                      )}
+                      {!isEditing && !profileUser.socialLinks?.github && !profileUser.socialLinks?.linkedin && !profileUser.socialLinks?.twitter && !profileUser.socialLinks?.website && (
+                        <p className="col-span-2 text-xs text-primary-700 italic">No external platforms connected.</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -398,10 +409,10 @@ const Profile: React.FC = () => {
 
 // Simplified Helpers
 const SocialLink: React.FC<{ href?: string; icon: React.ReactNode; label: string; brand: string }> = ({ href, icon, label }) => {
-  if (!href) return <div className="p-2.5 rounded-xl border border-[#27272a] bg-[#111111] text-primary-800 opacity-30"><div className="w-4 h-4 mx-auto">{icon}</div></div>;
+  if (!href) return null;
   return (
-    <a href={href} target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-[#27272a] bg-[#1d1d20] text-primary-500 hover:text-white hover:bg-[#27272a] transition-all" title={label}>
-      <div className="w-4 h-4 mx-auto">{icon}</div>
+    <a href={href} target="_blank" rel="noreferrer" className="p-2.5 rounded-xl border border-[#27272a] bg-[#1d1d20] text-primary-500 hover:text-white hover:bg-[#27272a] transition-all flex items-center justify-center" title={label}>
+      <div className="w-4 h-4">{icon}</div>
     </a>
   );
 };
@@ -451,10 +462,6 @@ const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: number |
       <p className="text-2xl font-black text-white leading-none">{value}</p>
     </div>
   </div>
-);
-
-const ImageIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
 );
 
 export default Profile;

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Users, LayoutList } from 'lucide-react';
 import { Course } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { resolveApiUrl } from '../utils/urlResolver';
 import api from '../services/api';
 
 interface CourseCardProps {
@@ -45,11 +46,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, isEnrolled }) => {
       <div className="relative h-40 overflow-hidden border-b border-[#27272a] bg-[#1d1d20]">
         {course.thumbnail ? (
           <img
-            src={
-              course.thumbnail.startsWith('/uploads/')
-                ? `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5001'}${course.thumbnail}`
-                : course.thumbnail
-            }
+            src={resolveApiUrl(course.thumbnail)}
             alt={course.title}
             className="h-full w-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-105 group-hover:opacity-100"
           />

@@ -5,7 +5,7 @@ import { authService } from '../services/authService';
 import api from '../services/api';
 import { Enrollment } from '../types';
 
-const AVATAR_API = 'https://api.dicebear.com/9.x/initials/svg?seed=';
+const AVATAR_API = 'https://api.dicebear.com/9.x/miniavs/svg?seed=';
 
 interface AuthContextType {
   user: User | null;

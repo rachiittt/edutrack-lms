@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { resolveApiUrl } from '../utils/urlResolver';
 import toast from 'react-hot-toast';
 import {
   ClipboardList,
@@ -21,7 +22,8 @@ import {
   BarChart,
   ChevronRight,
   GraduationCap,
-  Mail
+  Mail,
+  LogOut
 } from 'lucide-react';
 import classNames from 'classnames';
 import ReactQuill from 'react-quill-new';
@@ -168,6 +170,22 @@ const CourseDetails: React.FC = () => {
     } finally {
       setEnrolling(false);
     }
+  };
+
+  const handleUnenroll = () => {
+    requestConfirm('Leave Course', 'Are you sure you want to unenroll from this course? Your progress and quiz results will be permanently removed.', async () => {
+      try {
+        await api.delete(`/enrollments/courses/${id}/enroll`);
+        toast.success('Successfully unenrolled from course.');
+        setIsEnrolled(false);
+        await refreshEnrollments();
+        await loadCourse();
+      } catch (error) {
+        toast.error(getApiError(error, 'Failed to unenroll from course'));
+      } finally {
+        closeConfirm();
+      }
+    });
   };
 
   const requestConfirm = (title: string, message: string, action: () => void, variant: 'danger' | 'warning' = 'danger') => {
@@ -467,11 +485,7 @@ const CourseDetails: React.FC = () => {
             <div className="space-y-8 animate-fade-in">
               <div className="relative group overflow-hidden rounded-3xl border border-[#27272a] shadow-2xl">
                 <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-transparent opacity-60 z-10" />
-                <img src={
-                  course.thumbnail?.startsWith('/uploads/') 
-                    ? `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5001'}${course.thumbnail}` 
-                    : course.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200&q=80'
-                } alt={course.title} className="h-80 w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <img src={resolveApiUrl(course.thumbnail) || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200&q=80'} alt={course.title} className="h-80 w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 
                 <div className="absolute bottom-6 left-8 z-20">
                   <span className="tag mb-3 bg-primary-500 text-white border-primary-400/30">
@@ -485,9 +499,37 @@ const CourseDetails: React.FC = () => {
                 <div className="space-y-8 h-full">
                   <div className="widget-panel p-8 h-full">
                     <h3 className="text-xl font-bold text-white mb-6">Course Syllabus</h3>
-                    <p className="text-base leading-relaxed text-primary-300 whitespace-pre-wrap">
+                    <p className="text-base leading-relaxed text-primary-300 whitespace-pre-wrap mb-8">
                       {course.description}
                     </p>
+
+                    <div className="pt-8 border-t border-[#27272a]">
+                      <h3 className="text-xl font-bold text-white mb-6">Meet your Instructor</h3>
+                      <div className="flex items-center gap-5">
+                        <img 
+                          src={resolveApiUrl(course.teacher.avatar) || `https://api.dicebear.com/9.x/miniavs/svg?seed=${encodeURIComponent(course.teacher.username || course.teacher.name)}`} 
+                          alt={course.teacher.name} 
+                          className="w-20 h-20 rounded-2xl border border-[#27272a] object-cover shadow-2xl"
+                        />
+                        <div>
+                          <button 
+                            onClick={() => navigate(`/profile/${course.teacher._id}`)}
+                            className="text-xl font-black text-white hover:text-primary-400 transition-colors text-left"
+                          >
+                            {course.teacher.name}
+                          </button>
+                          <p className="text-xs text-primary-500 font-bold uppercase tracking-widest mt-1">Lead Educator</p>
+                        </div>
+                      </div>
+                      {course.teacher.bio && (
+                        <div className="mt-6 p-4 rounded-2xl bg-[#111111] border border-[#27272a] relative">
+                          <div className="absolute -top-3 left-6 px-2 bg-[#111111] text-[10px] font-bold text-primary-600 uppercase tracking-tighter">Instructor Bio</div>
+                          <p className="text-sm text-primary-400 italic leading-relaxed">
+                            "{course.teacher.bio}"
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                 </div>
@@ -502,8 +544,13 @@ const CourseDetails: React.FC = () => {
                             {enrolling ? 'Processing...' : 'Enroll in Course'}
                           </button>
                         ) : (
-                          <div className="flex items-center justify-center gap-3 text-emerald-400 font-bold text-sm bg-emerald-500/5 h-14 px-6 rounded-2xl border border-emerald-500/20 shadow-inner">
-                            <PlayCircle className="w-5 h-5" /> Currently Enrolled
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-center gap-3 text-emerald-400 font-bold text-sm bg-emerald-500/5 h-14 px-6 rounded-2xl border border-emerald-500/20 shadow-inner">
+                              <PlayCircle className="w-5 h-5" /> Currently Enrolled
+                            </div>
+                            <button onClick={handleUnenroll} className="w-full text-xs font-bold text-primary-500 hover:text-red-400 transition-colors py-2 flex items-center justify-center gap-2">
+                              <LogOut className="w-3.5 h-3.5" /> Leave Course / Revoke Access
+                            </button>
                           </div>
                         )}
                       </div>
@@ -588,7 +635,7 @@ const CourseDetails: React.FC = () => {
                          <div className="widget-panel w-full max-w-[280px] overflow-hidden shadow-2xl ring-1 ring-white/5">
                             <div className="h-32 bg-[#1d1d20] border-b border-[#27272a] overflow-hidden flex items-center justify-center">
                               {editCourseForm.thumbnail ? (
-                                <img src={editCourseForm.thumbnail.startsWith('/uploads/') ? `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5001'}${editCourseForm.thumbnail}` : editCourseForm.thumbnail} className="w-full h-full object-cover" />
+                                <img src={resolveApiUrl(editCourseForm.thumbnail)} className="w-full h-full object-cover" />
                               ) : <ImageIcon className="w-8 h-8 text-[#3f3f46]" />}
                             </div>
                             <div className="p-4 bg-[#09090b]">
@@ -721,7 +768,7 @@ const CourseDetails: React.FC = () => {
                       <div className="flex items-center gap-5">
                         <div className="h-14 w-14 overflow-hidden rounded-2xl border border-[#27272a] bg-[#1d1d20] shadow-lg">
                           <img
-                            src={c.avatar?.startsWith('/uploads/') ? `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5001'}${c.avatar}` : (c.avatar || `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(c.name)}`)}
+                            src={resolveApiUrl(c.avatar) || `https://api.dicebear.com/9.x/miniavs/svg?seed=${encodeURIComponent(c.name)}`}
                             alt={c.name}
                             className="h-full w-full object-cover"
                           />
