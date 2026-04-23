@@ -1,9 +1,9 @@
 import app from './app';
 import { config } from './config/env';
-import { database } from './config/db';
+import { connectDB } from './config/db';
 const startServer = async () => {
   try {
-    await database.connect();
+    await connectDB();
     app.listen(config.port, () => {
       console.log(`\nEduTrack API server running on port ${config.port}`);
       console.log(`Environment: ${config.nodeEnv}`);

@@ -1,40 +1,12 @@
 import mongoose from 'mongoose';
 import { config } from './env';
-class Database {
-  private static instance: Database;
-  private isConnected: boolean = false;
-  private constructor() {}
-  public static getInstance(): Database {
-    
-    if (!Database.instance) {
-      Database.instance = new Database();
-    }
-    return Database.instance;
+
+export const connectDB = async (): Promise<void> => {
+  try {
+    const conn = await mongoose.connect(config.mongoUri);
+    console.log(`✅ MongoDB connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.error('❌ MongoDB connection error:', error);
+    process.exit(1);
   }
-  public async connect(): Promise<void> {
-    if (this.isConnected) {
-
-      console.log('📦 Using existing database connection');
-      return;
-    }
-    try {
-      const conn = await mongoose.connect(config.mongoUri);
-      this.isConnected = true;
-      console.log(`MongoDB connected: ${conn.connection.host}`);
-
-    } catch (error) {
-      console.error('MongoDB connection error:', error);
-      process.exit(1);
-
-    }
-  }
-  public async disconnect(): Promise<void> {
-
-    if (!this.isConnected) return;
-    await mongoose.disconnect();
-    this.isConnected = false;
-    console.log('MongoDB disconnected');
-
-  }
-}
-export const database = Database.getInstance();
+};

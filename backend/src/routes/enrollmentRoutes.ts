@@ -9,6 +9,18 @@ router.post(
   roleGuard('student'),
   EnrollmentController.enroll
 );
+router.delete(
+  '/courses/:id/enroll',
+  authenticate,
+  roleGuard('student'),
+  EnrollmentController.unenroll
+);
+router.delete(
+  '/:enrollmentId',
+  authenticate,
+  roleGuard('teacher', 'admin'),
+  EnrollmentController.removeStudent
+);
 router.get(
   '/courses/:id/enrollment-status',
   authenticate,
@@ -25,5 +37,11 @@ router.get(
   authenticate,
   roleGuard('teacher', 'admin'),
   EnrollmentController.getCourseEnrollments
+);
+router.get(
+  '/courses/:id/students/:studentId/progress',
+  authenticate,
+  roleGuard('teacher', 'admin'),
+  EnrollmentController.getStudentProgress
 );
 export default router;

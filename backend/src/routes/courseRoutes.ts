@@ -31,4 +31,6 @@ router.delete(
   roleGuard('teacher', 'admin'),
   CourseController.delete
 );
+router.post('/:id/collaborators', authenticate, roleGuard('teacher', 'admin'), CourseController.addCollaborator);
+router.delete('/:id/collaborators', authenticate, roleGuard('teacher', 'admin'), CourseController.removeCollaborator);
 export default router;
