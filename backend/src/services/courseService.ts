@@ -126,6 +126,11 @@ export class CourseService {
   }
 
   async addCollaborator(courseId: string, teacherId: string, identifier: string): Promise<ICourse> {
+    if (!identifier || typeof identifier !== 'string' || !identifier.trim()) {
+      throw ApiError.badRequest('Please provide a valid email or username');
+    }
+
+    const sanitizedIdentifier = identifier.trim().toLowerCase();
     const course = await this.getById(courseId);
     
     const mainTeacherId = course.teacher._id?.toString() || course.teacher.toString();
@@ -135,12 +140,12 @@ export class CourseService {
 
     const { User } = require('../models/User');
     const collaborator = await User.findOne({ 
-      $or: [{ email: identifier }, { username: identifier }],
-      role: 'teacher' 
+      $or: [{ email: sanitizedIdentifier }, { username: sanitizedIdentifier }],
+      role: { $in: ['teacher', 'admin'] }
     });
     
     if (!collaborator) {
-      throw ApiError.notFound('Teacher not found with this email or username');
+      throw ApiError.notFound('No teacher found with this email or username. Only users with the teacher role can be added as collaborators.');
     }
 
     if (mainTeacherId === collaborator._id.toString()) {
