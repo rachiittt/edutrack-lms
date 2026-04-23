@@ -24,8 +24,8 @@ export const courseService = {
     const response = await api.get<ApiResponse<{ categories: string[] }>>('/courses/categories');
     return response.data.data.categories;
   },
-  addCollaborator: async (courseId: string, email: string) => {
-    const response = await api.post<ApiResponse<{ course: Course }>>(`/courses/${courseId}/collaborators`, { email });
+  addCollaborator: async (courseId: string, identifier: string) => {
+    const response = await api.post<ApiResponse<{ course: Course }>>(`/courses/${courseId}/collaborators`, { identifier });
     return response.data.data.course;
   },
   removeCollaborator: async (courseId: string, collaboratorId: string) => {
