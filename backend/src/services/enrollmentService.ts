@@ -1,69 +1,114 @@
-import { IEnrollment } from '../models/Enrollment';
-import { IEnrollmentRepository } from '../interfaces/IEnrollmentRepository';
-import { ICourseRepository } from '../interfaces/ICourseRepository';
-import { IEnrollmentService } from '../interfaces/IEnrollmentService';
-import { eventBus, AppEvents } from '../patterns/EventBus';
+import { Enrollment, IEnrollment } from '../models/Enrollment';
+import { Course } from '../models/Course';
+import { eventBus, AppEvents } from '../utils/EventBus';
 import { ApiError } from '../utils/ApiError';
 import { Logger } from '../utils/Logger';
-export class EnrollmentService implements IEnrollmentService {
-  private readonly enrollmentRepository: IEnrollmentRepository;
-  private readonly courseRepository: ICourseRepository;
+
+export class EnrollmentService {
   private readonly logger: Logger;
-  constructor(
-    enrollmentRepository: IEnrollmentRepository,
-    courseRepository: ICourseRepository
-  ) {
-    this.enrollmentRepository = enrollmentRepository;
-    this.courseRepository = courseRepository;
+
+  constructor() {
     this.logger = Logger.createLogger('EnrollmentService');
   }
+
   async enroll(studentId: string, courseId: string): Promise<IEnrollment> {
-    const course = await this.courseRepository.findById(courseId);
+    const course = await Course.findById(courseId);
     if (!course) {
       throw ApiError.notFound('Course not found');
     }
-    const existing = await this.enrollmentRepository.findByStudentAndCourse(
-      studentId,
-      courseId
-    );
+
+    const existing = await Enrollment.findOne({ student: studentId, course: courseId });
     if (existing) {
       throw ApiError.conflict('Already enrolled in this course');
     }
-    const enrollment = await this.enrollmentRepository.create({
+
+    const enrollment = new Enrollment({
       student: studentId,
       course: courseId,
-    } as unknown as Partial<IEnrollment>);
-    await this.courseRepository.incrementEnrollmentCount(courseId);
+    });
+
+    await enrollment.save();
+    await Course.findByIdAndUpdate(courseId, { $inc: { enrollmentCount: 1 } });
+
     this.logger.info(`Student ${studentId} enrolled in course ${courseId}`);
+    
     await eventBus.publish(AppEvents.STUDENT_ENROLLED, {
       studentId,
       courseId,
       courseName: course.title,
     });
+
     return enrollment;
   }
-  async getMyEnrollments(studentId: string): Promise<IEnrollment[]> {
-    return this.enrollmentRepository.findByStudent(studentId);
+
+  async unenroll(studentId: string, courseId: string): Promise<void> {
+    const enrollment = await Enrollment.findOne({ student: studentId, course: courseId });
+    if (!enrollment) {
+      throw ApiError.notFound('Enrollment not found');
+    }
+
+    await Enrollment.findByIdAndDelete(enrollment._id).exec();
+    await Course.findByIdAndUpdate(courseId, { $inc: { enrollmentCount: -1 } });
+    
+    this.logger.info(`Student ${studentId} unenrolled from course ${courseId}`);
   }
-  async getCourseEnrollments(
-    courseId: string,
-    teacherId: string,
-    userRole: string
-  ): Promise<IEnrollment[]> {
-    const course = await this.courseRepository.findById(courseId);
+
+  async removeStudent(enrollmentId: string, teacherId: string, userRole: string): Promise<void> {
+    const enrollment = await Enrollment.findById(enrollmentId);
+    if (!enrollment) {
+      throw ApiError.notFound('Enrollment not found');
+    }
+
+    const courseId = enrollment.course.toString();
+    const course = await Course.findById(courseId);
     if (!course) {
       throw ApiError.notFound('Course not found');
     }
-    if (
-      userRole !== 'admin' &&
-      course.teacher._id?.toString() !== teacherId &&
-      course.teacher.toString() !== teacherId
-    ) {
-      throw ApiError.forbidden('You can only view enrollments for your own courses');
+
+    const mainTeacherId = course.teacher._id?.toString() || course.teacher.toString();
+    const isCollaborator = course.collaborators?.some(c => (c._id?.toString() || c.toString()) === teacherId);
+
+    if (userRole !== 'admin' && mainTeacherId !== teacherId && !isCollaborator) {
+      throw ApiError.forbidden('You can only remove students from courses you manage');
     }
-    return this.enrollmentRepository.findByCourse(courseId);
+
+    await Enrollment.findByIdAndDelete(enrollmentId).exec();
+    await Course.findByIdAndUpdate(courseId, { $inc: { enrollmentCount: -1 } });
+    
+    this.logger.info(`Teacher ${teacherId} removed enrollment ${enrollmentId}`);
   }
+
+  async getMyEnrollments(studentId: string): Promise<IEnrollment[]> {
+    return Enrollment.find({ student: studentId })
+      .populate({
+        path: 'course',
+        populate: { path: 'teacher', select: 'name email' },
+      })
+      .sort({ enrolledAt: -1 })
+      .exec();
+  }
+
+  async getCourseEnrollments(courseId: string, teacherId: string, userRole: string): Promise<IEnrollment[]> {
+    const course = await Course.findById(courseId);
+    if (!course) {
+      throw ApiError.notFound('Course not found');
+    }
+
+    const mainTeacherId = course.teacher._id?.toString() || course.teacher.toString();
+    const isCollaborator = course.collaborators?.some(c => (c._id?.toString() || c.toString()) === teacherId);
+
+    if (userRole !== 'admin' && mainTeacherId !== teacherId && !isCollaborator) {
+      throw ApiError.forbidden('You can only view enrollments for courses you manage');
+    }
+
+    return Enrollment.find({ course: courseId })
+      .populate('student', 'name email avatar')
+      .sort({ enrolledAt: -1 })
+      .exec();
+  }
+
   async isEnrolled(studentId: string, courseId: string): Promise<boolean> {
-    return this.enrollmentRepository.isEnrolled(studentId, courseId);
+    const enrollment = await Enrollment.findOne({ student: studentId, course: courseId });
+    return enrollment !== null;
   }
 }
