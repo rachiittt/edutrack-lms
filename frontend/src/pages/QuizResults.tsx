@@ -105,12 +105,12 @@ const QuizResults: React.FC = () => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-white truncate">
-                    {typeof result.student === 'object'
+                    {result.student && typeof result.student === 'object'
                       ? result.student.name
                       : 'Student'}
                   </p>
                   <p className="text-xs text-primary-500 truncate">
-                    {typeof result.student === 'object' ? result.student.email : ''}
+                    {result.student && typeof result.student === 'object' ? result.student.email : ''}
                   </p>
                 </div>
                 <div className="text-right shrink-0">
