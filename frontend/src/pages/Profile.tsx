@@ -187,7 +187,7 @@ const Profile: React.FC = () => {
                     alt={profileUser.name}
                     className="h-full w-full object-cover"
                     onError={(e) => {
-                      e.currentTarget.src = `${AVATAR_API}${encodeURIComponent(profileUser.name)}`;
+                      e.currentTarget.src = `${AVATAR_API}${encodeURIComponent(profileUser.name || 'User')}`;
                     }}
                   />
                 )}
