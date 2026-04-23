@@ -154,7 +154,7 @@ const Dashboard: React.FC = () => {
             <div className="mb-12">
               <h2 className="mb-2 text-2xl font-bold text-white">
                 Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'},{' '}
-                {user?.name?.split(' ')[0]}
+                {user?.name?.split(' ')[0] || 'User'}
               </h2>
               <p className="text-primary-400">
                 {canManageCourses
