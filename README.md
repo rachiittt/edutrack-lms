@@ -45,15 +45,15 @@ edutrack-lms/
 │       ├── services/      # Business logic layer
 │       └── utils/         # ApiError class, seed data script
 ├── frontend/
-│   └── src/
-│       ├── assets/        # Static files (images, icons)
-│       ├── components/    # Reusable UI components
-│       ├── context/       # Global state (Auth context provider)
-│       ├── pages/         # Route pages
-│       ├── services/      # API call functions (Axios)
-│       ├── types/         # TypeScript interfaces for the client
-│       └── utils/         # Helper functions and formatters
-└── .env.example
+   └── src/
+        ├── assets/        # Static files (images, icons)
+        ├── components/    # Reusable UI components
+        ├── context/       # Global state (Auth context provider)
+        ├── pages/         # Route pages
+        ├── services/      # API call functions (Axios)
+        ├── types/         # TypeScript interfaces for the client
+        └── utils/         # Helper functions and formatters
+
 ```
 
 ## Getting Started
