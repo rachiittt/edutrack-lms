@@ -9,6 +9,7 @@ export interface ICourseQuery {
   search?: string;
   category?: string;
   teacher?: string;
+  pendingCollaborator?: string;
 }
 
 export class CourseService {
@@ -30,6 +31,9 @@ export class CourseService {
     }
     if (teacher) {
       filter.teacher = teacher;
+    }
+    if (query.pendingCollaborator) {
+      filter.pendingCollaborators = query.pendingCollaborator;
     }
 
     const skip = (page - 1) * limit;
@@ -58,6 +62,7 @@ export class CourseService {
     const course = await Course.findById(id)
       .populate('teacher', 'name email avatar bio')
       .populate('collaborators', 'name email avatar')
+      .populate('pendingCollaborators', 'name email avatar')
       .exec();
     
     if (!course) {
@@ -156,14 +161,64 @@ export class CourseService {
       throw ApiError.conflict('Teacher is already a collaborator');
     }
 
+    if (course.pendingCollaborators?.some(c => (c._id?.toString() || c.toString()) === collaborator._id.toString())) {
+      throw ApiError.conflict('Collaboration request already sent to this teacher');
+    }
+
     const updatedCourse = await Course.findByIdAndUpdate(
       courseId,
-      { $addToSet: { collaborators: collaborator._id } },
+      { $addToSet: { pendingCollaborators: collaborator._id } },
       { new: true }
     ).populate('teacher', 'name email avatar')
      .populate('collaborators', 'name email avatar')
+     .populate('pendingCollaborators', 'name email avatar')
      .exec();
 
+    return updatedCourse!;
+  }
+
+  async acceptCollaboration(courseId: string, teacherId: string): Promise<ICourse> {
+    const course = await this.getById(courseId);
+    
+    const isPending = course.pendingCollaborators?.some(c => (c._id?.toString() || c.toString()) === teacherId);
+    if (!isPending) {
+      throw ApiError.badRequest('No pending collaboration request found for this teacher');
+    }
+
+    const updatedCourse = await Course.findByIdAndUpdate(
+      courseId,
+      { 
+        $pull: { pendingCollaborators: teacherId },
+        $addToSet: { collaborators: teacherId }
+      },
+      { new: true }
+    ).populate('teacher', 'name email avatar')
+     .populate('collaborators', 'name email avatar')
+     .populate('pendingCollaborators', 'name email avatar')
+     .exec();
+
+    this.logger.info(`Collaboration accepted: ${courseId} by ${teacherId}`);
+    return updatedCourse!;
+  }
+
+  async rejectCollaboration(courseId: string, teacherId: string): Promise<ICourse> {
+    const course = await this.getById(courseId);
+    
+    const isPending = course.pendingCollaborators?.some(c => (c._id?.toString() || c.toString()) === teacherId);
+    if (!isPending) {
+      throw ApiError.badRequest('No pending collaboration request found for this teacher');
+    }
+
+    const updatedCourse = await Course.findByIdAndUpdate(
+      courseId,
+      { $pull: { pendingCollaborators: teacherId } },
+      { new: true }
+    ).populate('teacher', 'name email avatar')
+     .populate('collaborators', 'name email avatar')
+     .populate('pendingCollaborators', 'name email avatar')
+     .exec();
+
+    this.logger.info(`Collaboration rejected: ${courseId} by ${teacherId}`);
     return updatedCourse!;
   }
 
@@ -177,10 +232,11 @@ export class CourseService {
 
     const updatedCourse = await Course.findByIdAndUpdate(
       courseId,
-      { $pull: { collaborators: collaboratorId } },
+      { $pull: { collaborators: collaboratorId, pendingCollaborators: collaboratorId } },
       { new: true }
     ).populate('teacher', 'name email avatar')
      .populate('collaborators', 'name email avatar')
+     .populate('pendingCollaborators', 'name email avatar')
      .exec();
 
     return updatedCourse!;

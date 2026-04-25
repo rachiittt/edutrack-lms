@@ -85,7 +85,7 @@ export class CourseController {
         req.user!._id.toString(),
         identifier
       );
-      ApiResponse.success(res, { course }, 'Collaborator added successfully');
+      ApiResponse.success(res, { course }, 'Collaboration request sent successfully');
     } catch (error) {
       next(error);
     }
@@ -100,6 +100,30 @@ export class CourseController {
         collaboratorId
       );
       ApiResponse.success(res, { course }, 'Collaborator removed successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async acceptCollaboration(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const course = await container.courseService.acceptCollaboration(
+        req.params.id,
+        req.user!._id.toString()
+      );
+      ApiResponse.success(res, { course }, 'Collaboration request accepted');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  static async rejectCollaboration(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const course = await container.courseService.rejectCollaboration(
+        req.params.id,
+        req.user!._id.toString()
+      );
+      ApiResponse.success(res, { course }, 'Collaboration request rejected');
     } catch (error) {
       next(error);
     }

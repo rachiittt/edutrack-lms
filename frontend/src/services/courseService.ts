@@ -32,4 +32,14 @@ export const courseService = {
     const response = await api.delete<ApiResponse<{ course: Course }>>(`/courses/${courseId}/collaborators`, { data: { collaboratorId } });
     return response.data.data.course;
   },
+
+  acceptCollaboration: async (courseId: string) => {
+    const response = await api.post<ApiResponse<{ course: Course }>>(`/courses/${courseId}/collaborators/accept`);
+    return response.data.data.course;
+  },
+
+  rejectCollaboration: async (courseId: string) => {
+    const response = await api.post<ApiResponse<{ course: Course }>>(`/courses/${courseId}/collaborators/reject`);
+    return response.data.data.course;
+  },
 };

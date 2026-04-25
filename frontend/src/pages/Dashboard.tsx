@@ -8,14 +8,22 @@ import {
   Plus,
   TrendingUp,
   Trophy,
+  UserCheck,
+  UserX,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { courseService } from '../services/courseService';
 import { quizService } from '../services/quizService';
-import { Course, QuizResult } from '../types';
+import {
+  Course,
+  QuizResult,
+  ApiResponse,
+} from '../types';
 import CourseCard from '../components/CourseCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { formatDate } from '../utils/formatters';
+import { getApiError } from '../utils/apiErrorHandler';
+import toast from 'react-hot-toast';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 const Dashboard: React.FC = () => {
@@ -25,6 +33,7 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ totalCourses: 0, totalStudents: 0 });
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
+  const [collaborationRequests, setCollaborationRequests] = useState<Course[]>([]);
 
   const canManageCourses = user?.role === 'teacher' || user?.role === 'admin';
 
@@ -47,6 +56,15 @@ const Dashboard: React.FC = () => {
             0
           ),
         });
+        
+        try {
+          const collabResponse = await courseService.getAll({ pendingCollaborator: user._id });
+          setCollaborationRequests(collabResponse.courses);
+        } catch (error) {
+          console.error('Failed to load collaboration requests:', error);
+          setCollaborationRequests([]);
+        }
+
         setQuizResults([]);
       } else {
         const response = await courseService.getAll({ limit: 4 });
@@ -112,6 +130,26 @@ const Dashboard: React.FC = () => {
   const heatmapData = buildHeatmapData();
   const activeDaysCount = heatmapData.filter((item) => item.level > 0).length;
 
+  const handleAcceptCollaboration = async (courseId: string) => {
+    try {
+      await courseService.acceptCollaboration(courseId);
+      toast.success('You are now a collaborator!');
+      void loadData();
+    } catch (error) {
+      toast.error(getApiError(error, 'Failed to accept invitation'));
+    }
+  };
+
+  const handleRejectCollaboration = async (courseId: string) => {
+    try {
+      await courseService.rejectCollaboration(courseId);
+      toast.success('Invitation declined');
+      void loadData();
+    } catch (error) {
+      toast.error(getApiError(error, 'Failed to decline invitation'));
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -145,6 +183,48 @@ const Dashboard: React.FC = () => {
           </button>
         )}
       </div>
+
+      {canManageCourses && collaborationRequests.length > 0 && (
+        <div className="mb-8 animate-slide-up">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-2 w-2 rounded-full bg-yellow-500 animate-pulse" />
+            <h2 className="text-sm font-bold uppercase tracking-widest text-primary-500">
+              Collaboration Invites ({collaborationRequests.length})
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {collaborationRequests.map((course) => (
+              <div key={course._id} className="widget-panel p-5 bg-gradient-to-br from-[#1d1d20] to-[#111111] border-yellow-500/20">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-primary-500/10 flex items-center justify-center border border-primary-500/20 text-primary-500">
+                      <BookOpen className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-white line-clamp-1">{course.title}</h3>
+                      <p className="text-xs text-primary-500">Invited by {course.teacher.name}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleAcceptCollaboration(course._id)}
+                    className="flex-1 btn-primary h-9 gap-2 text-xs bg-emerald-600 hover:bg-emerald-500 border-emerald-500/20"
+                  >
+                    <UserCheck className="h-3.5 w-3.5" /> Accept
+                  </button>
+                  <button
+                    onClick={() => handleRejectCollaboration(course._id)}
+                    className="flex-1 btn-secondary h-9 gap-2 text-xs border-red-500/20 text-red-400 hover:bg-red-500/10 hover:text-red-400"
+                  >
+                    <UserX className="h-3.5 w-3.5" /> Decline
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4 lg:grid-cols-6">
         <div className={`widget-panel relative col-span-1 bg-grid p-6 md:col-span-4 ${canManageCourses ? 'lg:col-span-3 h-96' : 'lg:col-span-4'}`}>
