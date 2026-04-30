@@ -147,7 +147,7 @@ We have documented the system design through the following diagrams:
 4.  **Sequence Diagram**: Details the step-by-step workflow for Course Creation.
 
 > [!TIP]
-> All UML diagrams are hosted and can be viewed in high resolution here: [Excalidraw Project Link](https://excalidraw.com/#json=IZuhYg8LoQ4qXGpKE4Any,dbes2XwwHklcriedZ9VgwA)
+> All UML diagrams are hosted and can be viewed in high resolution here: [Excalidraw Project Link](https://excalidraw.com/#json=7oc-BxltuuVsF1y2HszDs,S1L-gM7lTGApBxzTbKnCWg)
 
 ---
 

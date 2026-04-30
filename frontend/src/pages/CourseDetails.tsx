@@ -23,7 +23,8 @@ import {
   ChevronRight,
   GraduationCap,
   Mail,
-  LogOut
+  LogOut,
+  UserMinus
 } from 'lucide-react';
 import classNames from 'classnames';
 import ReactQuill from 'react-quill-new';
@@ -248,7 +249,7 @@ const CourseDetails: React.FC = () => {
       const updatedCourse = await courseService.addCollaborator(id, collaboratorEmail.trim());
       setCourse(updatedCourse);
       setCollaboratorEmail('');
-      toast.success('Collaborator added successfully');
+      toast.success('Collaboration request sent successfully');
     } catch (error) {
       toast.error(getApiError(error, 'Failed to add collaborator'));
     } finally {
@@ -773,20 +774,57 @@ const CourseDetails: React.FC = () => {
                             className="h-full w-full object-cover"
                           />
                         </div>
-                        <div>
-                          <p className="font-black text-white text-lg tracking-tight">{c.name}</p>
-                          <p className="text-xs text-primary-500 font-bold uppercase tracking-widest">{c.email}</p>
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-white">{c.name}</span>
+                          <span className="text-xs text-primary-500">{c.email}</span>
                         </div>
                       </div>
                       <button
                         onClick={() => handleRemoveCollaborator(c._id, c.name)}
                         className="h-11 w-11 flex items-center justify-center rounded-xl text-primary-600 transition-all hover:bg-red-500/10 hover:text-red-500 border border-transparent hover:border-red-500/20"
-                        title="Revoke Access"
+                        title="Remove Collaborator"
                       >
-                        <Trash2 className="h-5 w-5" />
+                        <UserMinus className="h-5 w-5" />
                       </button>
                     </div>
                   ))}
+                </div>
+              )}
+
+              {course.pendingCollaborators && course.pendingCollaborators.length > 0 && (
+                <div className="p-8 border-t border-[#27272a] bg-[#09090b]/20">
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-500 mb-6 flex items-center gap-2">
+                    <div className="h-1.5 w-1.5 rounded-full bg-yellow-500 animate-pulse" />
+                    Pending Collaboration Requests ({course.pendingCollaborators.length})
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {course.pendingCollaborators.map((c: { _id: string; name: string; email: string; avatar?: string }) => (
+                      <div key={c._id} className="widget-panel p-4 flex items-center justify-between bg-[#111111]/50 border border-[#27272a]">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="h-10 w-10 rounded-full bg-primary-500/10 flex items-center justify-center border border-primary-500/20 shrink-0">
+                            {c.avatar ? (
+                              <img src={resolveApiUrl(c.avatar)} alt={c.name} className="h-full w-full rounded-full object-cover" />
+                            ) : (
+                              <span className="text-sm font-bold text-primary-500">{c.name.charAt(0)}</span>
+                            )}
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-semibold text-white truncate">{c.name}</span>
+                            <span className="text-[10px] text-primary-500 truncate">{c.email}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0 ml-4">
+                          <button
+                            onClick={() => handleRemoveCollaborator(c._id, c.name)}
+                            className="h-8 w-8 flex items-center justify-center rounded-lg text-primary-600 hover:bg-red-500/10 hover:text-red-400 transition-all border border-transparent hover:border-red-500/20"
+                            title="Cancel Request"
+                          >
+                            <UserMinus className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

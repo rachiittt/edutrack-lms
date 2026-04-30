@@ -26,6 +26,7 @@ export interface Course {
   thumbnail: string;
   teacher: User;
   collaborators: User[];
+  pendingCollaborators: User[];
   enrollmentCount: number;
   createdAt: string;
   updatedAt: string;
