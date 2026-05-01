@@ -1,4 +1,4 @@
-# EduTrack LMS
+# EduTrack LMS.
 
 A full-stack Learning Management System built with React, Node.js, Express, TypeScript, and MongoDB.
 
